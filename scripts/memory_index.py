@@ -451,6 +451,25 @@ def expand_role_dirs(roles, base):
     return out
 
 
+def _atomic_write(path, text):
+    """Write via temp file + os.replace: a crash mid-write can never leave a
+    half-written index/state behind — readers keep the previous good copy.
+    C34 P3#5 (parity with OpenClaw memory-builtin: build into a temp store,
+    then publish atomically; on failure the old index stays intact)."""
+    d = os.path.dirname(os.path.abspath(path)) or "."
+    fd, tmp = tempfile.mkstemp(dir=d, prefix=".mma_tmp_")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
+
+
 def build(out_path, state_path, files, lang="en"):
     w = _words(lang)
     prev = {}
@@ -490,10 +509,8 @@ def build(out_path, state_path, files, lang="en"):
             )
         except Exception as e:
             lines.append(w["row_fail"].format(name=name, e=e))
-    with open(out_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
-    with open(state_path, "w", encoding="utf-8") as f:
-        json.dump(new_state, f, ensure_ascii=False, indent=1)
+    _atomic_write(out_path, "\n".join(lines) + "\n")
+    _atomic_write(state_path, json.dumps(new_state, ensure_ascii=False, indent=1))
     print(w["ok"].format(out=out_path, n=len(files), c=n_changed))
 
 
@@ -714,6 +731,22 @@ def demo():
     build(os.path.join(d, "idx.md"), os.path.join(d, "st.json"), files)
     c3, u3 = file_flags(os.path.join(d, "idx.md"))
     assert c3 == 1 and u3 == 0, f"D3 got {c3} changed {u3} unchanged"
+
+    # E. atomic write (C34 P3#5): a failed write must leave the old file intact
+    #    and must not leak temp files; a good write must actually land.
+    ap = os.path.join(d, "atomic.md")
+    _atomic_write(ap, "v1\n")
+    assert open(ap, encoding="utf-8").read() == "v1\n", "E1 first write failed"
+    _atomic_write(ap, "v2\n")
+    assert open(ap, encoding="utf-8").read() == "v2\n", "E2 overwrite failed"
+    try:
+        _atomic_write(ap, "bad \ud800\n")   # lone surrogate -> encode fails mid-write
+    except UnicodeEncodeError:
+        pass
+    else:
+        raise AssertionError("E3 unencodable text should have raised")
+    assert open(ap, encoding="utf-8").read() == "v2\n", "E3 failed write clobbered the old file"
+    assert not [n for n in os.listdir(d) if n.startswith(".mma_tmp_")], "E3 temp file leaked"
 
     shutil.rmtree(d, ignore_errors=True)
     print("demo OK: discover(3 envs: md/todo.txt/empty) + lifecycle stat + legacy migration + index 3 scenarios — all passed")

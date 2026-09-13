@@ -1,6 +1,6 @@
 ---
 name: evermind-ai-agent-memory
-version: 0.4.3
+version: 0.4.4
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n中文触发:新对话\"接着上次\" / 上下文快满 / 用户说\"我说过了\" / 每轮重读同样的规则待办 / 开场烧掉几万 token / 长任务交接"
 author: TXJ · 天玄镜 (Tianxuanjing)
 license: MIT-0
@@ -26,7 +26,7 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 
 | Platform | How to use |
 |---|---|
-| **Hermes** (Nous Research) | Drop this folder into the agent's `skills/` directory. On each new session say "recover memory" (or wire the SKILL.md procedure into a session-reset hook). Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative savings case). |
+| **Hermes** (Nous Research) | Drop this folder into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically (saying "recover memory" per session still works). Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative savings case). |
 | **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install evermind-ai-agent-memory` or copy into the agent's skills dir. |
 | **Claude Code / Cursor / Codex / other SKILL.md agents** | Copy this folder into the project or agent skills directory; at the start of a session, instruct the agent to follow SKILL.md (the procedure is model-agnostic). |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic, runs on Windows/macOS/Linux, no GPU. |
@@ -70,6 +70,8 @@ python scripts/memory_index.py --demo
 ```
 
 Discovered roles are cached in `.evermind/discovery.json` — the agent reads it at recovery instead of re-scanning every session. Delete that file (or any discovered source) and it re-discovers automatically.
+
+**Want it to run without being asked?** Paste `assets/agents-snippet.md` (shipped with this skill) into your project's instruction file — `AGENTS.md`, or `.hermes.md` on Hermes. Hermes, OpenClaw and DeepSeek Harness load that file at session start, so the procedure above runs by itself: no code, no hooks, no config.
 
 ## Usage (start of every new session)
 
@@ -158,6 +160,11 @@ Switching sessions is only free if the *next* session knows where the last one s
 
 The nudge bands above are the hard rule: **any nudge — pre-nudge or full nudge — goes out only after `.evermind/handover.md` has been refreshed** (see Context threshold nudges). A nudge without a ready handover is just anxiety, not a safe suggestion. Recovery reads the handover if present (step 6); authority always stays with todos/journal, the handover is the fast pointer.
 
+Two more rules keep the handover trustworthy when it matters most:
+
+- **Refresh before you report.** Anything that *ends* a working stretch — a wrap-up message, a stage summary, a "done" report — refreshes `.evermind/handover.md` **before** it goes out. A report sent on top of a stale handover is a lost thread: the user reads "done", starts a fresh session, and lands on the previous state.
+- **Single writer.** Only the interactive main session writes the handover. Sub-agents, background workers and scheduled jobs never write it — with several writers each holding its own idea of "the current state", the last one to finish silently overwrites the others.
+
 ## Manual discovery fallback (Python unavailable)
 
 Look for, in order (the script header candidate constants are authoritative — this is a summary):
@@ -172,6 +179,7 @@ Look for, in order (the script header candidate constants are authoritative — 
 - `scripts/memory_index.py` — discovery + change-index generator (pure stdlib; `--discover` / `--list` / `--demo` / `--mode internal|auto|manual`)
 - `scripts/rule_gate.py` — optional action-time guardrail (reads `.evermind/rules.json`; `--check "desc"` or PreToolUse stdin; `--demo`)
 - `assets/handover-template.md` — handover note template
+- `assets/agents-snippet.md` — paste-in block for your project's instruction file (Hermes / OpenClaw / DeepSeek Harness), so recovery runs at session start with no hook
 - `config.example.yaml` — configuration template (mode / roles / extras)
 - Outputs: `.evermind/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.evermind/rules.json` + `.evermind/handover.md`
 

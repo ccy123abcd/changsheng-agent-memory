@@ -6,7 +6,7 @@
 
 **Cross-session memory recovery for AI agents. Restore state in ~70% fewer tokens (~55-75% cumulative when the host already injects identity) — and switch contexts anytime, at any task boundary, without losing your agent's memory.**
 
-![version](https://img.shields.io/badge/version-0.4.3-blue)
+![version](https://img.shields.io/badge/version-0.4.4-blue)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
 ![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw-lightgrey)
 ![deps](https://img.shields.io/badge/deps-zero-orange)
@@ -52,13 +52,18 @@ python scripts/memory_index.py            # discover + write index (≈30s total
 python scripts/memory_index.py --demo
 ```
 
-Then, at the start of each new session, instruct your agent to follow `SKILL.md` (or wire it into a session-reset hook for Hermes).
+### Make it automatic (3 lines, 3 platforms)
+
+Paste the block in [`assets/agents-snippet.md`](assets/agents-snippet.md) into **your project's
+instruction file** — `AGENTS.md` (or `.hermes.md` on Hermes if you use one). Hermes, OpenClaw and
+DeepSeek Harness all load that file at session start, so recovery then runs by itself: no code, no
+hooks, no config. No instruction file in your project? Then just say "recover memory" per session.
 
 ## Platform support
 
 | Platform | How to use |
 |---|---|
-| **Hermes** (Nous Research) | Drop into the agent's `skills/` directory; invoke "recover memory" per session or wire SKILL.md into a session-reset hook. Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative case). |
+| **Hermes** (Nous Research) | Drop into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically. Hermes injects SOUL/MEMORY/USER itself, and the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative case). |
 | **ClawHub / OpenClaw** | Dual-compatible frontmatter (standard + `metadata.hermes`). Install into the skills directory or via your hub client. |
 | **Claude Code / Cursor / Codex** | Copy the folder into the project or agent skills directory (`~/.claude/skills/`, etc.); instruct the agent to follow SKILL.md at session start. |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic; Windows / macOS / Linux; no GPU. |

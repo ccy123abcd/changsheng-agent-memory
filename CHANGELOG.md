@@ -4,6 +4,23 @@
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-09-14
+
+### Added
+- `assets/agents-snippet.md` — a paste-in block for your project's instruction file. Hermes, OpenClaw and DeepSeek Harness all load that file at session start, so recovery then runs by itself: no code, no hooks, no config.
+- README: "Make it automatic (3 lines, 3 platforms)" section + a per-platform table of which instruction file is loaded when.
+
+### Changed
+- README / platform table: the automatic route is now stated first; wiring a session-reset hook is no longer presented as the only way to automate. The manual route is unchanged and still supported — say "recover memory" (or 接着上次) at session start.
+
+### Fixed
+- `scripts/memory_index.py`: the change index **and its state file** are now written
+  atomically (temp file + `os.replace`). An interrupted or failed run can no longer
+  leave a half-written `memory_index.md` / `memory_index_state.json` behind — the
+  previous good copy stays intact (parity with OpenClaw `memory-builtin` full-rebuild
+  semantics). Verified: `--demo` E-block (first write / overwrite / failed write keeps
+  the old file / no `.mma_tmp_` leak).
+
 ## [0.4.3] - 2026-09-12
 
 ### Changed

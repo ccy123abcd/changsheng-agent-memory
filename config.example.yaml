@@ -45,6 +45,10 @@ tracked_files_extra:
 # Where the generated index + state file are written (default: next to the config).
 output_index: memory_index.md
 output_state: memory_index_state.json
+# output_dir: .   # where the index + state are written (default: next to the config)
+
+# Display language of the generated index: en (default when absent) | zh.
+lang: en
 
 # Context-switch nudge thresholds (optional, percentages, ascending). The agent
 # checks context usage and nudges you to start a fresh session as usage climbs —
