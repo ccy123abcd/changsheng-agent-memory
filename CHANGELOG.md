@@ -4,6 +4,24 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-15
+
+### Changed
+- **Renamed: Evermind -> ChangShen.** The published name sat too close to unrelated
+  products already using it in this same space (an AI-agent-memory company, plus a
+  trademarked name), which risked confusion with products we have nothing to do with.
+  Everything user-visible now reads `ChangShen`:
+  - package / skill identifier: `evermind-ai-agent-memory` -> `changshen-agent-memory`
+  - display name: `Evermind` -> `ChangShen`
+  - runtime directory: `.evermind/` -> `.changshen/` (`discovery.json`, `rules.json`, `handover.md`)
+- Publisher attribution is unchanged: `TXJ · 天玄镜 (Tianxuanjing)`.
+
+### Migration
+- No behaviour change: same recovery flow, same commands, same config keys. Only names differ.
+- Coming from 0.4.x: rename any existing `.evermind/` directory to `.changshen/`, or just
+  delete it — discovery runs again on the next use. If `rule_gate.py` is wired into a hook,
+  update the path in that hook command.
+
 ## [0.4.4] - 2026-09-14
 
 ### Added
@@ -92,7 +110,7 @@
 ### Changed
 - SKILL.md Usage step 2 & How-it-works L2 row updated to the split policy (previously "changed → read in full").
 - Honest-numbers wording aligned to the measured 2026-09-04 range (~55-75% cumulative for host-injected identity; retired the 85%/6.5K projection phrasing).
-- Install references updated to the final slug `evermind-ai-agent-memory` (old working titles removed).
+- Install references updated to the final slug `evermind-agent-memory` (old working titles removed).
 
 ### Fixed
 - (none)

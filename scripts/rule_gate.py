@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""rule_gate.py — optional action-time guardrail for Evermind (v0.4).
+"""rule_gate.py — optional action-time guardrail for ChangShen (v0.4).
 
-Reads .evermind/rules.json — the user's extracted PROHIBITIONS only
+Reads .changshen/rules.json — the user's extracted PROHIBITIONS only
 ("never …", "don't …", "always ask first") — and checks an action description
 against them. A hit means the action violates a stated rule and should be
 blocked before it runs. Positive rules ("always do X") are NOT enforced here:
@@ -38,7 +38,7 @@ import json
 import os
 import sys
 
-RULES_FILE = ".evermind/rules.json"
+RULES_FILE = ".changshen/rules.json"
 
 
 def load_rules(base: str = ".") -> list:

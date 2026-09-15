@@ -1,6 +1,6 @@
 ---
-name: evermind-ai-agent-memory
-version: 0.4.4
+name: changshen-agent-memory
+version: 0.5.0
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n中文触发:新对话\"接着上次\" / 上下文快满 / 用户说\"我说过了\" / 每轮重读同样的规则待办 / 开场烧掉几万 token / 长任务交接"
 author: TXJ · 天玄镜 (Tianxuanjing)
 license: MIT-0
@@ -10,7 +10,7 @@ metadata:
     related_skills: []
 ---
 
-# Evermind
+# ChangShen
 
 **Use when**: a new chat asks where you left off · context is filling up mid-task · the user says "I already told you this" · you re-read the same identity/rules/todos files every session · session start burns tens of thousands of tokens · you hand a long task to a fresh session.
 
@@ -18,7 +18,7 @@ metadata:
 
 **Cost**: recovery ~44K → ~12K tokens (~70% less); ~55-75% cumulative when the host already injects identity (measured 2026-09-04). Pure local, zero API cost.
 
-Progressive memory recovery for AI agents: your assistant stops losing context between sessions, without re-reading everything every time. Evermind first **discovers where your memory actually lives** (your files, your layout), then hands the agent a **shift handover** at session start.
+Progressive memory recovery for AI agents: your assistant stops losing context between sessions, without re-reading everything every time. ChangShen first **discovers where your memory actually lives** (your files, your layout), then hands the agent a **shift handover** at session start.
 
 Every new session feels like "day one at work"? This skill makes the agent read what matters (identity, rules, todos, latest work log), check an auto-generated **change index** before re-reading secondary files, and defer everything else until actually needed.
 
@@ -27,7 +27,7 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 | Platform | How to use |
 |---|---|
 | **Hermes** (Nous Research) | Drop this folder into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically (saying "recover memory" per session still works). Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative savings case). |
-| **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install evermind-ai-agent-memory` or copy into the agent's skills dir. |
+| **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install changshen-agent-memory` or copy into the agent's skills dir. |
 | **Claude Code / Cursor / Codex / other SKILL.md agents** | Copy this folder into the project or agent skills directory; at the start of a session, instruct the agent to follow SKILL.md (the procedure is model-agnostic). |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic, runs on Windows/macOS/Linux, no GPU. |
 
@@ -54,43 +54,43 @@ The engine is `scripts/memory_index.py`: it **discovers** your memory files (rol
 
 ```bash
 # 1. get the skill (already done if you installed from ClawHub)
-git clone https://github.com/ccy123abcd/evermind-ai-agent-memory.git
-cp -r evermind-ai-agent-memory ~/.claude/skills/evermind   # or your agent's skills dir
+git clone https://github.com/ccy123abcd/changshen-agent-memory.git
+cp -r changshen-agent-memory ~/.claude/skills/changshen   # or your agent's skills dir
 
 # 2. cold start: no config needed — discovery finds your memory layout
-cd evermind-ai-agent-memory
+cd changshen-agent-memory
 python scripts/memory_index.py --list .    # preview what discovery finds (nothing written)
 python scripts/memory_index.py             # cold start: discover + write index
 
 # 3. (optional) tune: copy config.example.yaml → config.yaml, set mode/roles/extras
-#    or edit .evermind/discovery.json to override a discovered role
+#    or edit .changshen/discovery.json to override a discovered role
 
 # 4. self-test
 python scripts/memory_index.py --demo
 ```
 
-Discovered roles are cached in `.evermind/discovery.json` — the agent reads it at recovery instead of re-scanning every session. Delete that file (or any discovered source) and it re-discovers automatically.
+Discovered roles are cached in `.changshen/discovery.json` — the agent reads it at recovery instead of re-scanning every session. Delete that file (or any discovered source) and it re-discovers automatically.
 
 **Want it to run without being asked?** Paste `assets/agents-snippet.md` (shipped with this skill) into your project's instruction file — `AGENTS.md`, or `.hermes.md` on Hermes. Hermes, OpenClaw and DeepSeek Harness load that file at session start, so the procedure above runs by itself: no code, no hooks, no config.
 
 ## Usage (start of every new session)
 
-1. **Step 0 — Discover (first time or when sources moved)**: run `python scripts/memory_index.py --discover .` — it locates your memory carriers by common conventions (candidate list lives in the script header constants) and writes `.evermind/discovery.json`. Python unavailable? Fall back to the hand-list below (derived from the script; the script is authoritative). At every recovery, first **stat the stored paths** — any missing/unreadable source triggers re-discovery (never reuse stale paths).
+1. **Step 0 — Discover (first time or when sources moved)**: run `python scripts/memory_index.py --discover .` — it locates your memory carriers by common conventions (candidate list lives in the script header constants) and writes `.changshen/discovery.json`. Python unavailable? Fall back to the hand-list below (derived from the script; the script is authoritative). At every recovery, first **stat the stored paths** — any missing/unreadable source triggers re-discovery (never reuse stale paths).
 2. **Read the L3 must-read files**: roles resolved in step 0/1 (rules, identity, todos, journal) + `must_read_extra`. Every one, no shortcuts. Host injected identity (Hermes/OpenClaw)? Mark `identity ✅ (host)` and skip the file probe.
-2b. **Rules alignment**: from the rules file(s) just read, extract every imperative rule the user stated (do X / never do Y). List them explicitly in your recovery report — this is the moment the user experiences as *"it remembered what I told it"*. Then write/refresh `.evermind/rules.json` (id, text, keywords per rule) so the guardrail can enforce them at action time (see Rules & guardrails). If the rules file is empty or has no imperative rules, say "no hard rules found" honestly.
+2b. **Rules alignment**: from the rules file(s) just read, extract every imperative rule the user stated (do X / never do Y). List them explicitly in your recovery report — this is the moment the user experiences as *"it remembered what I told it"*. Then write/refresh `.changshen/rules.json` (id, text, keywords per rule) so the guardrail can enforce them at action time (see Rules & guardrails). If the rules file is empty or has no imperative rules, say "no hard rules found" honestly.
 3. **Read the change index** `memory_index.md`:
    - ✅ new change → read that file in full
    - ⏸ unchanged → read only its index summary line ← **savings live here**
 4. **L1 on-demand**: consult detail docs only when a task actually needs them.
 5. **Context gauge**: report real context usage — query your platform (Hermes `/status`; Claude Code `/context`; others: see the platform table below). Never invent a percentage; if the platform exposes none, say so. Optionally append `context: N%` to your recovery report. **If `config.yaml` exists with `nudge_thresholds`, read it once and use those lines instead of the 30/50/70 defaults below** (this is how the user tunes when to be nudged).
-6. **Check for a handover note**: if `.evermind/handover.md` exists, read it first (it is the fast pointer to where the last session stopped), then **delete it** — a handover is a one-shot note; keeping it would make the third session read a stale pointer. Authority stays with todos/journal — the handover only accelerates.
+6. **Check for a handover note**: if `.changshen/handover.md` exists, read it first (it is the fast pointer to where the last session stopped), then **delete it** — a handover is a one-shot note; keeping it would make the third session read a stale pointer. Authority stays with todos/journal — the handover only accelerates.
 7. **Report recovery honestly**: `identity ✅ (host) · rules ✅ CLAUDE.md · todos ✅ docs/TODO.md · journal ✅ journal/2026-09-04.md · rules aligned: 3 (r1 never delete without asking · r2 reply in Chinese · r3 …)`. If a role came up empty, list it explicitly — never claim a full recovery that didn't happen.
 
 ### Context threshold nudges
 
 Check context usage **every time you see it** (at recovery, and after every user turn when your platform exposes a gauge) — usage is a snapshot that jumps between turns: this turn may read 29%, the next 49%. Never assume the last reading still holds, and never wait for a threshold to be crossed before speaking up. **Nudge when you are approaching a threshold too** — a jump can skip a band entirely.
 
-**Hard rule — the nudge is the ready signal.** Before ANY nudge goes out — pre-nudge or full nudge — refresh `.evermind/handover.md` with a one-line snapshot of where work stands (current task · what's done · what's next). The user may switch sessions the moment they read the nudge, and they must lose nothing. A nudge without a ready handover is not a nudge — it is a trap. If the user then says "handover" or switches, the handover is already there.
+**Hard rule — the nudge is the ready signal.** Before ANY nudge goes out — pre-nudge or full nudge — refresh `.changshen/handover.md` with a one-line snapshot of where work stands (current task · what's done · what's next). The user may switch sessions the moment they read the nudge, and they must lose nothing. A nudge without a ready handover is not a nudge — it is a trap. If the user then says "handover" or switches, the handover is already there.
 
 **Thresholds are user-tunable.** The default three lines are **30 / 50 / 70%** with a pre-nudge band 5 points below each. Users who want more headroom can shift the whole ladder — e.g. set the first line to 35 (default example: 30/50/70 → 35/55/75) by editing the band table in this file or their config's `nudge_thresholds` if present. Whatever the numbers, keep the *shape*: a pre-nudge band below each line (line − 5), a calm mid-band, and an urgent top band ("switch now"). Defaults:
 
@@ -106,7 +106,7 @@ Check context usage **every time you see it** (at recovery, and after every user
 
 With custom thresholds (e.g. 35/55/75), the bands move to match: pre-nudge at line−5, calm below the first line, urgent at the top line. The principle never changes: **never let a reading pass in silence just because it did not cross a line — and never nudge without a ready handover.**
 
-Switching is safe and cheap: that is the whole point of Evermind (recovery ≈ 12K tokens instead of tens of thousands of re-explaining).
+Switching is safe and cheap: that is the whole point of ChangShen (recovery ≈ 12K tokens instead of tens of thousands of re-explaining).
 
 ### Platform context queries
 
@@ -120,11 +120,11 @@ Switching is safe and cheap: that is the whole point of Evermind (recovery ≈ 1
 
 ## Rules & guardrails
 
-Evermind treats your rules as **memory too** — the most important kind. Two layers make them stick:
+ChangShen treats your rules as **memory too** — the most important kind. Two layers make them stick:
 
 **Alignment layer (every session).** At recovery (step 2b) the agent restates the imperative rules it found in your rules files — do's and don'ts alike. You see, in plain text, that what you set is loaded. No rule file yet? Write your rules in `CLAUDE.md`/`AGENTS.md`/your rules file — plain sentences work: *"Never delete files without asking."* *"Always reply in Chinese."* *"Ask before sending anything externally."*
 
-**Enforcement layer (where the platform supports it).** Prohibitions you never want broken ("never", "don't", "always ask first") get written to `.evermind/rules.json` (id / text / keywords), and a tiny local gate script checks every action before it runs:
+**Enforcement layer (where the platform supports it).** Prohibitions you never want broken ("never", "don't", "always ask first") get written to `.changshen/rules.json` (id / text / keywords), and a tiny local gate script checks every action before it runs:
 
 ```bash
 python scripts/rule_gate.py --check "delete the whole project folder"
@@ -142,7 +142,7 @@ python scripts/rule_gate.py --check "delete the whole project folder"
         "matcher": "*",
         "hooks": [
           { "type": "command",
-            "command": "python ~/.claude/skills/evermind/scripts/rule_gate.py" }
+            "command": "python ~/.claude/skills/changshen/scripts/rule_gate.py" }
         ]
       }
     ]
@@ -156,13 +156,13 @@ The gate is pure stdlib, fails open (no rules file → pass), and writes nothing
 
 ## Handover protocol
 
-Switching sessions is only free if the *next* session knows where the last one stopped. Say **"handover"** (or "交接/收尾") at any task break — a natural stopping point, a finished task, or when a context nudge suggests switching — and the agent writes `.evermind/handover.md` from the template (assets/handover-template.md): ✅ done (what matters next) · 📌 leftover (what's waiting, on whom) · 🔗 pointers (files/tasks that anchor it) · ➡️ next step. Each new handover **overwrites** the previous one; recovery reads it once and **deletes it** (step 6) — a consumed handover must never linger as a stale pointer.
+Switching sessions is only free if the *next* session knows where the last one stopped. Say **"handover"** (or "交接/收尾") at any task break — a natural stopping point, a finished task, or when a context nudge suggests switching — and the agent writes `.changshen/handover.md` from the template (assets/handover-template.md): ✅ done (what matters next) · 📌 leftover (what's waiting, on whom) · 🔗 pointers (files/tasks that anchor it) · ➡️ next step. Each new handover **overwrites** the previous one; recovery reads it once and **deletes it** (step 6) — a consumed handover must never linger as a stale pointer.
 
-The nudge bands above are the hard rule: **any nudge — pre-nudge or full nudge — goes out only after `.evermind/handover.md` has been refreshed** (see Context threshold nudges). A nudge without a ready handover is just anxiety, not a safe suggestion. Recovery reads the handover if present (step 6); authority always stays with todos/journal, the handover is the fast pointer.
+The nudge bands above are the hard rule: **any nudge — pre-nudge or full nudge — goes out only after `.changshen/handover.md` has been refreshed** (see Context threshold nudges). A nudge without a ready handover is just anxiety, not a safe suggestion. Recovery reads the handover if present (step 6); authority always stays with todos/journal, the handover is the fast pointer.
 
 Two more rules keep the handover trustworthy when it matters most:
 
-- **Refresh before you report.** Anything that *ends* a working stretch — a wrap-up message, a stage summary, a "done" report — refreshes `.evermind/handover.md` **before** it goes out. A report sent on top of a stale handover is a lost thread: the user reads "done", starts a fresh session, and lands on the previous state.
+- **Refresh before you report.** Anything that *ends* a working stretch — a wrap-up message, a stage summary, a "done" report — refreshes `.changshen/handover.md` **before** it goes out. A report sent on top of a stale handover is a lost thread: the user reads "done", starts a fresh session, and lands on the previous state.
 - **Single writer.** Only the interactive main session writes the handover. Sub-agents, background workers and scheduled jobs never write it — with several writers each holding its own idea of "the current state", the last one to finish silently overwrites the others.
 
 ## Manual discovery fallback (Python unavailable)
@@ -177,16 +177,16 @@ Look for, in order (the script header candidate constants are authoritative — 
 ## Files
 
 - `scripts/memory_index.py` — discovery + change-index generator (pure stdlib; `--discover` / `--list` / `--demo` / `--mode internal|auto|manual`)
-- `scripts/rule_gate.py` — optional action-time guardrail (reads `.evermind/rules.json`; `--check "desc"` or PreToolUse stdin; `--demo`)
+- `scripts/rule_gate.py` — optional action-time guardrail (reads `.changshen/rules.json`; `--check "desc"` or PreToolUse stdin; `--demo`)
 - `assets/handover-template.md` — handover note template
 - `assets/agents-snippet.md` — paste-in block for your project's instruction file (Hermes / OpenClaw / DeepSeek Harness), so recovery runs at session start with no hook
 - `config.example.yaml` — configuration template (mode / roles / extras)
-- Outputs: `.evermind/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.evermind/rules.json` + `.evermind/handover.md`
+- Outputs: `.changshen/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.changshen/rules.json` + `.changshen/handover.md`
 
 ## Security
 
-- Discovery scans candidate paths by **name only** (metadata, no content) and writes `.evermind/discovery.json`; the index reads and hashes only files you listed (roles + extras)
-- Never writes your memory files themselves — its own outputs are limited to `.evermind/discovery.json`, the index md + state json, plus two optional files the agent maintains at your request: `.evermind/rules.json` (your extracted rules, for the optional gate) and `.evermind/handover.md` (your one-shot handover note, deleted after being read)
+- Discovery scans candidate paths by **name only** (metadata, no content) and writes `.changshen/discovery.json`; the index reads and hashes only files you listed (roles + extras)
+- Never writes your memory files themselves — its own outputs are limited to `.changshen/discovery.json`, the index md + state json, plus two optional files the agent maintains at your request: `.changshen/rules.json` (your extracted rules, for the optional gate) and `.changshen/handover.md` (your one-shot handover note, deleted after being read)
 - Nothing is uploaded anywhere — fully local, no remote install pipelines, no script-to-shell execution
 - Python standard library only. PyYAML optional: when absent, a built-in fallback parser reads the config (nested `roles:`, extras, flat `role_*` keys) — no silent config loss
 
