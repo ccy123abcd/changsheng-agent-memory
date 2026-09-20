@@ -1,7 +1,7 @@
-# ChangShen
+# ChangSheng
 
 <p align="center">
-  <img src="assets/banner.png" alt="ChangShen — cross-session memory recovery for AI agents" width="100%">
+  <img src="assets/banner.png" alt="ChangSheng — cross-session memory recovery for AI agents" width="100%">
 </p>
 
 **Cross-session memory recovery for AI agents. Restore state in ~70% fewer tokens (~55-75% cumulative when the host already injects identity) — and switch contexts anytime, at any task boundary, without losing your agent's memory.**
@@ -13,7 +13,7 @@
 
 Every new session feels like "day one at work"? Your agent doesn't know who you are, what the rules are, or where work left off — so you re-explain everything, and it still drops things.
 
-ChangShen hands your agent a **shift handover** before it starts working:
+ChangSheng hands your agent a **shift handover** before it starts working:
 
 - **Always reads** the core layer — identity, rules, user profile, latest todos, latest work log (nothing important silently dropped)
 - **Re-states your rules** every session (rules alignment) — the do's and don'ts you set stay loaded, and stay followed
@@ -37,16 +37,16 @@ Every switch costs a few thousand tokens to recover instead of tens of thousands
 
 ```bash
 # 1. get the skill
-git clone https://github.com/ccy123abcd/changshen-agent-memory.git
-cp -r changshen ~/.claude/skills/          # or your agent's skills dir
+git clone https://github.com/ccy123abcd/changshengg-agent-memory.git
+cp -r changsheng ~/.claude/skills/          # or your agent's skills dir
 
 # 2. cold start (no config needed — discovery finds your layout)
-cd changshen
+cd changsheng
 python scripts/memory_index.py --list .   # optional: preview what discovery picks
 python scripts/memory_index.py            # discover + write index (≈30s total)
 
 # 3. (optional) tune — copy config.example.yaml → config.yaml (mode/roles/extras),
-#    or edit .changshen/discovery.json to override a discovered role
+#    or edit .changsheng/discovery.json to override a discovered role
 
 # 4. self-test
 python scripts/memory_index.py --demo
@@ -102,40 +102,40 @@ flowchart TD
 
 ## Configuration (optional)
 
-ChangShen works with **no config** (auto-discovery). To tune, copy `config.example.yaml` → `config.yaml`:
+ChangSheng works with **no config** (auto-discovery). To tune, copy `config.example.yaml` → `config.yaml`:
 
 - `mode` — `auto` (default, discovers your layout) / `manual` (explicit paths only) / `internal` (fixed-layout)
 - `roles` — semantic roles → real files: `rules` / `identity` / `todos` / `journal` / `profile` (file or directory; a directory resolves to its newest `YYYY-MM-DD.*` file)
 - `must_read_extra` — extra L3 files read in full every session
 - `tracked_files_extra` — extra L2 files, change-tracked (path / display name / description)
 
-Legacy 0.2.x `must_read`/`tracked_files` keys migrate automatically (kept as L3/L2 extras). Discovery output lives in `.changshen/discovery.json` — override any role there.
+Legacy 0.2.x `must_read`/`tracked_files` keys migrate automatically (kept as L3/L2 extras). Discovery output lives in `.changsheng/discovery.json` — override any role there.
 
 Outputs: `memory_index.md` (readable) + `memory_index_state.json` (state — don't hand-edit).
 
 ## Usage protocol (start of every new session)
 
-0. **Discover** — read `.changshen/discovery.json` (or run `python scripts/memory_index.py --discover .` on first use); stat the stored paths — any missing source triggers re-discovery. Python unavailable? Use the manual fallback list in SKILL.md.
+0. **Discover** — read `.changsheng/discovery.json` (or run `python scripts/memory_index.py --discover .` on first use); stat the stored paths — any missing source triggers re-discovery. Python unavailable? Use the manual fallback list in SKILL.md.
 1. Read the L3 roles + `must_read_extra` — every one, no shortcuts (host-injected identity = skip the file probe).
 2. Read `memory_index.md`:
    - ✅ new change → read that file in full
    - ⏸ unchanged → index summary line only
 3. Consult L1 detail docs only when a task needs them.
-4. **Rules alignment** — from the rules file just read, restate the imperative rules (do / don't) and write `.changshen/rules.json` for the guardrail. Optional hard enforcement: wire `scripts/rule_gate.py` into a platform hook (Claude Code PreToolUse example in SKILL.md).
+4. **Rules alignment** — from the rules file just read, restate the imperative rules (do / don't) and write `.changsheng/rules.json` for the guardrail. Optional hard enforcement: wire `scripts/rule_gate.py` into a platform hook (Claude Code PreToolUse example in SKILL.md).
 5. Report honestly with sources — list any role that came up empty; never claim a recovery that didn't happen.
-6. Context gauge — report real usage % when the platform exposes it (Hermes `/status`, Claude Code `/context`); check at every visible reading, nudge when approaching a band (25–30 / 45–50 / 65–70 by default) as well as inside it, and **refresh `.changshen/handover.md` before any nudge goes out** — the nudge is the ready signal (full band table in SKILL.md; **tune the lines via `nudge_thresholds` in config.yaml**, e.g. 30/50/70 → 35/55/75 for more headroom).
-7. Handover — at any task break say **"handover"**: the agent writes `.changshen/handover.md` from the template; the next session reads it first.
+6. Context gauge — report real usage % when the platform exposes it (Hermes `/status`, Claude Code `/context`); check at every visible reading, nudge when approaching a band (25–30 / 45–50 / 65–70 by default) as well as inside it, and **refresh `.changsheng/handover.md` before any nudge goes out** — the nudge is the ready signal (full band table in SKILL.md; **tune the lines via `nudge_thresholds` in config.yaml**, e.g. 30/50/70 → 35/55/75 for more headroom).
+7. Handover — at any task break say **"handover"**: the agent writes `.changsheng/handover.md` from the template; the next session reads it first.
 
 ## Repository layout
 
 ```
-changshen/
+changsheng/
 ├── SKILL.md                 # agent-facing instructions (progressive disclosure)
 ├── README.md                # this file
 ├── config.example.yaml      # configuration template
 ├── scripts/
 │   ├── memory_index.py      # change-index generator (pure stdlib, zero deps)
-│   └── rule_gate.py         # optional action-time guardrail (reads .changshen/rules.json)
+│   └── rule_gate.py         # optional action-time guardrail (reads .changsheng/rules.json)
 ├── assets/
 │   └── handover-template.md # handover note template
 ├── CHANGELOG.md
@@ -145,14 +145,14 @@ changshen/
 
 ## Security
 
-- Discovery scans candidate paths by name only (metadata — no content); the index reads and hashes only files you listed (roles + extras). Never writes your memory files themselves — its own outputs are `.changshen/discovery.json`, index md + state json, plus two optional agent-maintained files: `.changshen/rules.json` (extracted rules for the optional gate) and `.changshen/handover.md` (one-shot handover note, deleted after being read)
+- Discovery scans candidate paths by name only (metadata — no content); the index reads and hashes only files you listed (roles + extras). Never writes your memory files themselves — its own outputs are `.changsheng/discovery.json`, index md + state json, plus two optional agent-maintained files: `.changsheng/rules.json` (extracted rules for the optional gate) and `.changsheng/handover.md` (one-shot handover note, deleted after being read)
 - Nothing leaves your machine — no remote install pipelines, no script-to-shell execution
 - Python standard library only. PyYAML optional: when absent, a built-in fallback parser reads the config (nested `roles:`, extras, flat `role_*` keys) — no silent config loss
 
 ## FAQ
 
 **Why do I keep getting nudged to start a new session?**
-Context windows fill up as a conversation grows — replies slow down, early instructions get squeezed, and quality drops. ChangShen's nudges (default lines at 30/50/70%) remind you *before* that happens, and every nudge is preceded by a refreshed `.changshen/handover.md`, so switching loses nothing. Recovery after a switch costs ~12K tokens instead of tens of thousands of re-explaining.
+Context windows fill up as a conversation grows — replies slow down, early instructions get squeezed, and quality drops. ChangSheng's nudges (default lines at 30/50/70%) remind you *before* that happens, and every nudge is preceded by a refreshed `.changsheng/handover.md`, so switching loses nothing. Recovery after a switch costs ~12K tokens instead of tens of thousands of re-explaining.
 
 **Can I change when I get nudged? Yes.**
 Copy `config.example.yaml` → `config.yaml` and set `nudge_thresholds` to your own lines, e.g. `[35, 55, 75]` if you prefer more headroom before being reminded. The agent reads it at recovery and uses your lines instead of the defaults. (No config file? The 30/50/70 defaults apply.)
@@ -160,7 +160,7 @@ Copy `config.example.yaml` → `config.yaml` and set `nudge_thresholds` to your 
 **A nudge said "Handover is ready" — do I have to do anything?**
 No. The handover note was already written for you. Just start a new session (or say "handover" first if you want to add anything); the next session picks up exactly where you stopped.
 
-**Does ChangShen send my data anywhere?**
+**Does ChangSheng send my data anywhere?**
 No. Everything is local — discovery is name-only, the index hashes files you listed, nothing is uploaded. See Security.
 
 ## Roadmap (managed edition)
@@ -176,7 +176,7 @@ No. Everything is local — discovery is name-only, the index hashes files you l
 
 - **[Mode Switch Kit](https://github.com/ccy123abcd/mode-switch-machine-stack)** — one command flips your whole machine stack (VPN, background agents, local services, model tier) from a single YAML mode matrix. Its watchdogs repair the current mode and never revive what you switched off.
 
-ChangShen and Mode Switch Kit are two blocks of the same private-assistant setup (memory and context recovery, todos, multi-agent gateways, watchdogs), published separately so you can evaluate one at a time. More blocks are coming, and eventually they ship as a single package — installing one is the cheap way to see whether the rest is for you.
+ChangSheng and Mode Switch Kit are two blocks of the same private-assistant setup (memory and context recovery, todos, multi-agent gateways, watchdogs), published separately so you can evaluate one at a time. More blocks are coming, and eventually they ship as a single package — installing one is the cheap way to see whether the rest is for you.
 
 ## License
 
@@ -186,4 +186,4 @@ MIT-0 — free to use, modify, and sell.
 
 *Crafted with ❤ by TXJ · 天玄镜 (Tianxuanjing)*  
 
-⭐ Found this useful? Star the repo — it helps others find it. Found a bug? [Open an issue](https://github.com/ccy123abcd/changshen-agent-memory/issues).
+⭐ Found this useful? Star the repo — it helps others find it. Found a bug? [Open an issue](https://github.com/ccy123abcd/changshengg-agent-memory/issues).

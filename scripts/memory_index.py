@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""memory_index.py — change-index generator + environment discovery (ChangShen 0.3).
+"""memory_index.py — change-index generator + environment discovery (ChangSheng 0.3).
 
 Pure stdlib, zero dependencies. Two jobs:
 
 1. DISCOVER (--discover / --list): locate the user's memory carriers for the
    semantic roles (rules / todos / journal) by scanning common file
-   conventions. Discovery writes .changshen/discovery.json so recovery can
+   conventions. Discovery writes .changsheng/discovery.json so recovery can
    resolve roles -> real files. It only lists paths — it never reads content.
 
 2. INDEX (default): hash the L2 tracked files listed in config.yaml and write
@@ -58,9 +58,9 @@ TODOS_CANDIDATES_HOME = ["todo.txt", ".todo/"]  # todo.txt-cli conventions
 JOURNAL_DIRS = ["journal", "logs", "notes", "docs/journal", "journal/archive", "worklog"]
 JOURNAL_GLOB = re.compile(r"^\d{4}-\d{2}-\d{2}\.(md|txt|markdown)$")
 EXCLUDE_DIRS = {".git", ".obsidian", ".trash", ".venv", "node_modules",
-                ".changshen", "__pycache__", ".idea", ".vscode"}
+                ".changsheng", "__pycache__", ".idea", ".vscode"}
 DISCOVERY_FILE = "discovery.json"
-TIP_SAAS = ("tip: ChangShen targets local files. SaaS-only memory? "
+TIP_SAAS = ("tip: ChangSheng targets local files. SaaS-only memory? "
             "Export it to a local folder first.")
 
 # Display-language word table (template parametrisation). Public default is en
@@ -342,7 +342,7 @@ def discover(scan_root, mode="auto"):
 
 
 def discovery_path(scan_root):
-    return os.path.join(expand(scan_root or "."), ".changshen", DISCOVERY_FILE)
+    return os.path.join(expand(scan_root or "."), ".changsheng", DISCOVERY_FILE)
 
 
 def load_discovery(scan_root):
@@ -377,7 +377,7 @@ def write_discovery(scan_root, roles, missing):
 
 
 def print_discovery(roles, missing):
-    print("ChangShen discovery:")
+    print("ChangSheng discovery:")
     for role, paths in roles.items():
         if paths:
             joined = " · ".join(("injected" if p == "injected" else p) for p in paths)
@@ -519,7 +519,7 @@ def main():
     ap.add_argument("--config", default=None)
     ap.add_argument("--mode", choices=["internal", "auto", "manual"], default=None)
     ap.add_argument("--discover", nargs="?", const=".", default=None, metavar="ROOT",
-                    help="scan ROOT (default .) and write .changshen/discovery.json")
+                    help="scan ROOT (default .) and write .changsheng/discovery.json")
     ap.add_argument("--list", nargs="?", const=".", default=None, metavar="ROOT",
                     help="scan ROOT and print findings without writing")
     ap.add_argument("--demo", action="store_true")
@@ -544,10 +544,10 @@ def main():
         write_discovery(".", roles, missing)
         print_discovery(roles, missing)
         files = role_file_items(roles, ".")
-        out_dir = os.path.join(expand("."), ".changshen")
+        out_dir = os.path.join(expand("."), ".changsheng")
         os.makedirs(out_dir, exist_ok=True)
         if not files:
-            print("ERROR: nothing discovered to index. ChangShen targets local files "
+            print("ERROR: nothing discovered to index. ChangSheng targets local files "
                   "(rules/todos/journal); SaaS-only memory? Export it to a local folder first.", file=sys.stderr)
             return 3
         build(os.path.join(out_dir, "memory_index.md"),

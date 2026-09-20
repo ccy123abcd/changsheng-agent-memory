@@ -28,18 +28,18 @@
 ## [0.5.0] - 2026-09-15
 
 ### Changed
-- **Renamed: Evermind -> ChangShen.** The published name sat too close to unrelated
+- **Renamed: Evermind -> ChangSheng.** The published name sat too close to unrelated
   products already using it in this same space (an AI-agent-memory company, plus a
   trademarked name), which risked confusion with products we have nothing to do with.
-  Everything user-visible now reads `ChangShen`:
-  - package / skill identifier: `evermind-ai-agent-memory` -> `changshen-agent-memory`
-  - display name: `Evermind` -> `ChangShen`
-  - runtime directory: `.evermind/` -> `.changshen/` (`discovery.json`, `rules.json`, `handover.md`)
+  Everything user-visible now reads `ChangSheng`:
+  - package / skill identifier: `evermind-ai-agent-memory` -> `changshengg-agent-memory`
+  - display name: `Evermind` -> `ChangSheng`
+  - runtime directory: `.evermind/` -> `.changsheng/` (`discovery.json`, `rules.json`, `handover.md`)
 - Publisher attribution is unchanged: `TXJ · 天玄镜 (Tianxuanjing)`.
 
 ### Migration
 - No behaviour change: same recovery flow, same commands, same config keys. Only names differ.
-- Coming from 0.4.x: rename any existing `.evermind/` directory to `.changshen/`, or just
+- Coming from 0.4.x: rename any existing `.evermind/` directory to `.changsheng/`, or just
   delete it — discovery runs again on the next use. If `rule_gate.py` is wired into a hook,
   update the path in that hook command.
 

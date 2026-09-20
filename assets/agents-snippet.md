@@ -14,9 +14,9 @@ no code, no hooks, no config.
 ## The block to paste
 
 ```md
-## Session start — memory recovery (changshen)
+## Session start — memory recovery (changsheng)
 
-At the start of every new session, before anything else, follow the `changshen-agent-memory` skill
+At the start of every new session, before anything else, follow the `changshengg-agent-memory` skill
 (`SKILL.md`) as written:
 
 1. stat/discover the memory carriers (re-discover if a path moved)
