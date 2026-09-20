@@ -32,7 +32,7 @@
   products already using it in this same space (an AI-agent-memory company, plus a
   trademarked name), which risked confusion with products we have nothing to do with.
   Everything user-visible now reads `ChangSheng`:
-  - package / skill identifier: `evermind-ai-agent-memory` -> `changshengg-agent-memory`
+  - package / skill identifier: `evermind-ai-agent-memory` -> `changsheng-agent-memory`
   - display name: `Evermind` -> `ChangSheng`
   - runtime directory: `.evermind/` -> `.changsheng/` (`discovery.json`, `rules.json`, `handover.md`)
 - Publisher attribution is unchanged: `TXJ · 天玄镜 (Tianxuanjing)`.

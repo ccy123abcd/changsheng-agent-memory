@@ -16,7 +16,7 @@ no code, no hooks, no config.
 ```md
 ## Session start — memory recovery (changsheng)
 
-At the start of every new session, before anything else, follow the `changshengg-agent-memory` skill
+At the start of every new session, before anything else, follow the `changsheng-agent-memory` skill
 (`SKILL.md`) as written:
 
 1. stat/discover the memory carriers (re-discover if a path moved)

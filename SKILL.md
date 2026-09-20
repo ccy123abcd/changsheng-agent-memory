@@ -1,5 +1,5 @@
 ---
-name: changshengg-agent-memory
+name: changsheng-agent-memory
 version: 0.6.0
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n中文触发:新对话\"接着上次\" / 上下文快满 / 用户说\"我说过了\" / 每轮重读同样的规则待办 / 开场烧掉几万 token / 长任务交接"
 description_zh: "跨会话记忆恢复:新对话不再冷启动——身份/规则/待办常驻,变更索引把次要文件的重复读砍掉,恢复成本降约 70%。纯本地、零依赖。"
@@ -25,12 +25,12 @@ Progressive memory recovery for AI agents: your assistant stops losing context b
 Every new session feels like "day one at work"? This skill makes the agent read what matters (identity, rules, todos, latest work log), check an auto-generated **change index** before re-reading secondary files, and defer everything else until actually needed.
 
 ## Platform support
-**中文**:各平台怎么用——Hermes 丢进 skills/ 再粘 assets/agents-snippet.md;ClawHub 装 changshengg-agent-memory 或复制目录;Claude Code / Cursor / Codex 复制目录并让 agent 跟 SKILL.md;任意 LLM + 任意系统都能跑(纯约定 + 一个 Python 标准库脚本)。
+**中文**:各平台怎么用——Hermes 丢进 skills/ 再粘 assets/agents-snippet.md;ClawHub 装 changsheng-agent-memory 或复制目录;Claude Code / Cursor / Codex 复制目录并让 agent 跟 SKILL.md;任意 LLM + 任意系统都能跑(纯约定 + 一个 Python 标准库脚本)。
 
 | Platform | How to use |
 |---|---|
 | **Hermes** (Nous Research) | Drop this folder into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically (saying "recover memory" per session still works). Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the 55-75% cumulative savings case). |
-| **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install changshengg-agent-memory` or copy into the agent's skills dir. |
+| **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install changsheng-agent-memory` or copy into the agent's skills dir. |
 | **Claude Code / Cursor / Codex / other SKILL.md agents** | Copy this folder into the project or agent skills directory; at the start of a session, instruct the agent to follow SKILL.md (the procedure is model-agnostic). |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic, runs on Windows/macOS/Linux, no GPU. |
 
@@ -61,11 +61,11 @@ The engine is `scripts/memory_index.py`: it **discovers** your memory files (rol
 
 ```bash
 # 1. get the skill (already done if you installed from ClawHub)
-git clone https://github.com/ccy123abcd/changshengg-agent-memory.git
-cp -r changshengg-agent-memory ~/.claude/skills/changsheng   # or your agent's skills dir
+git clone https://github.com/ccy123abcd/changsheng-agent-memory.git
+cp -r changsheng-agent-memory ~/.claude/skills/changsheng   # or your agent's skills dir
 
 # 2. cold start: no config needed — discovery finds your memory layout
-cd changshengg-agent-memory
+cd changsheng-agent-memory
 python scripts/memory_index.py --list .    # preview what discovery finds (nothing written)
 python scripts/memory_index.py             # cold start: discover + write index
 

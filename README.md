@@ -37,7 +37,7 @@ Every switch costs a few thousand tokens to recover instead of tens of thousands
 
 ```bash
 # 1. get the skill
-git clone https://github.com/ccy123abcd/changshengg-agent-memory.git
+git clone https://github.com/ccy123abcd/changsheng-agent-memory.git
 cp -r changsheng ~/.claude/skills/          # or your agent's skills dir
 
 # 2. cold start (no config needed — discovery finds your layout)
@@ -186,4 +186,4 @@ MIT-0 — free to use, modify, and sell.
 
 *Crafted with ❤ by TXJ · 天玄镜 (Tianxuanjing)*  
 
-⭐ Found this useful? Star the repo — it helps others find it. Found a bug? [Open an issue](https://github.com/ccy123abcd/changshengg-agent-memory/issues).
+⭐ Found this useful? Star the repo — it helps others find it. Found a bug? [Open an issue](https://github.com/ccy123abcd/changsheng-agent-memory/issues).
