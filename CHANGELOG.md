@@ -4,6 +4,27 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-19
+
+### Added
+- **Dreaming — the write side.** Recovery is the read side; dreaming is the write side. On each
+  pass the agent tidies what it has stored, with five moves that each carry a checkable
+  criterion: merge duplicates, split look-alikes, retire stale entries, re-home new entries,
+  escalate doubts. Rhythm: once per 3-day cycle. Output: a one-page dream report.
+  The skill ships discipline and criteria only — it does not create jobs or scripts of its own;
+  scheduling stays with the host's own timer.
+- **Chinese reachability line.** Every H2 section now opens with a one-line Chinese summary
+  (`**中文**: …`), so a Chinese reader (or a Chinese-speaking agent) can orient before the
+  English body. The English body itself is unchanged.
+
+### Changed
+- Frontmatter gains `description_zh` / `description_en` (required by the WorkBuddy skill page).
+- README badge and the roadmap section synced to 0.6.0.
+
+### Migration
+- No behaviour change: same recovery flow, same commands, same config keys, same handover
+  protocol. Nothing to do when upgrading from 0.5.0.
+
 ## [0.5.0] - 2026-09-15
 
 ### Changed

@@ -6,7 +6,7 @@
 
 **Cross-session memory recovery for AI agents. Restore state in ~70% fewer tokens (~55-75% cumulative when the host already injects identity) — and switch contexts anytime, at any task boundary, without losing your agent's memory.**
 
-![version](https://img.shields.io/badge/version-0.5.0-blue)
+![version](https://img.shields.io/badge/version-0.6.0-blue)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
 ![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw-lightgrey)
 ![deps](https://img.shields.io/badge/deps-zero-orange)
@@ -167,6 +167,7 @@ No. Everything is local — discovery is name-only, the index hashes files you l
 
 - Auto user-profiling (preferences / habits)
 - Cross-device sync + web console
+- **0.6.0 — Dreaming (write side) + Chinese reachability lines** (2026-09-19)
 - One-click deploy
 
 **Don't want to self-configure?** The managed edition = zero-setup, full system, continuous updates. → [Managed edition: TBD]
