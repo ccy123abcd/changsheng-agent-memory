@@ -1,8 +1,7 @@
 ---
 name: changsheng-agent-memory
 version: 0.6.0
-description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n中文触发:新对话\"接着上次\" / 上下文快满 / 用户说\"我说过了\" / 每轮重读同样的规则待办 / 开场烧掉几万 token / 长任务交接"
-description_zh: "跨会话记忆恢复:新对话不再冷启动——身份/规则/待办常驻,变更索引把次要文件的重复读砍掉,恢复成本降约 70%。纯本地、零依赖。"
+description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n"
 description_en: "Cross-session memory recovery: a new chat never cold-starts — identity, rules and todos stay loaded, and a change index cuts the redundant re-reads (~70% cheaper recovery). Pure local, zero deps."
 author: TXJ · 天玄镜 (Tianxuanjing)
 license: MIT-0
@@ -25,7 +24,6 @@ Progressive memory recovery for AI agents: your assistant stops losing context b
 Every new session feels like "day one at work"? This skill makes the agent read what matters (identity, rules, todos, latest work log), check an auto-generated **change index** before re-reading secondary files, and defer everything else until actually needed.
 
 ## Platform support
-**中文**:各平台怎么用——Hermes 丢进 skills/ 再粘 assets/agents-snippet.md;ClawHub 装 changsheng-agent-memory 或复制目录;Claude Code / Cursor / Codex 复制目录并让 agent 跟 SKILL.md;任意 LLM + 任意系统都能跑(纯约定 + 一个 Python 标准库脚本)。
 
 | Platform | How to use |
 |---|---|
@@ -35,7 +33,6 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic, runs on Windows/macOS/Linux, no GPU. |
 
 ## What it gives you
-**中文**:给你什么——身份 / 规则 / 待办常驻,新会话接着上次;恢复从 ~44K 掉到 ~12K token(省约 70%,宿主已注入身份时累计 55-75%);100% 本地、零 API 花费;上下文用到 30/50/70% 档会被提醒。
 
 - 🧠 **No more lost context**: identity, rules, todos always loaded — nothing important silently dropped; new sessions resume where you left off
 - 📏 **Rules remembered**: the do's and don'ts you told your agent are re-stated at every recovery — and (where your platform supports hooks) enforced at action time. "It keeps forgetting I told it not to…" — that ends here
@@ -45,7 +42,6 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 - 📊 **Context health**: see your real context usage and get nudged as you approach the 30/50/70% lines by default (tunable via config) — and well before a session bloats
 
 ## How it works
-**中文**:三层——L3 每会话必读(小且固定)/ L2 只在变更索引标记「有变」时才读(省钱就在这)/ L1 按需读;引擎 = scripts/memory_index.py(md5 + 24h 窗口)。
 
 | Layer | Reads | When | Cost |
 |---|---|---|---|
@@ -57,7 +53,6 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 The engine is `scripts/memory_index.py`: it **discovers** your memory files (role → real file), then hashes every L2-tracked file and flags only what changed (md5 + 24h window). No index → you either re-read everything (expensive) or gamble (risky). With the index you get **neither**.
 
 ## Setup (≈30 seconds)
-**中文**:约 30 秒——`python scripts/memory_index.py --list .` 先预览发现结果,再不带参数跑一次建索引,`--demo` 自测;默认零配置(要调再 copy config.example.yaml)。
 
 ```bash
 # 1. get the skill (already done if you installed from ClawHub)
@@ -81,7 +76,6 @@ Discovered roles are cached in `.changsheng/discovery.json` — the agent reads 
 **Want it to run without being asked?** Paste `assets/agents-snippet.md` (shipped with this skill) into your project's instruction file — `AGENTS.md`, or `.hermes.md` on Hermes. Hermes, OpenClaw and DeepSeek Harness load that file at session start, so the procedure above runs by itself: no code, no hooks, no config.
 
 ## Usage (start of every new session)
-**中文**:每会话开场 7 步——发现并 stat 路径 → 读 L3 必读 → 规则对齐并写 rules.json(2b)→ 读变更索引 → 按需 L1 → 报真实上下文用量 → 读并删 handover → 如实报恢复结果(空项要点名)。
 
 1. **Step 0 — Discover (first time or when sources moved)**: run `python scripts/memory_index.py --discover .` — it locates your memory carriers by common conventions (candidate list lives in the script header constants) and writes `.changsheng/discovery.json`. Python unavailable? Fall back to the hand-list below (derived from the script; the script is authoritative). At every recovery, first **stat the stored paths** — any missing/unreadable source triggers re-discovery (never reuse stale paths).
 2. **Read the L3 must-read files**: roles resolved in step 0/1 (rules, identity, todos, journal) + `must_read_extra`. Every one, no shortcuts. Host injected identity (Hermes/OpenClaw)? Mark `identity ✅ (host)` and skip the file probe.
@@ -127,7 +121,6 @@ Switching is safe and cheap: that is the whole point of ChangSheng (recovery ≈
 | unknown | report "this platform exposes no context gauge" — do not invent a number |
 
 ## Rules & guardrails
-**中文**:规则也是记忆——对齐层每会话复述你定的规则;执行层把禁令写进 .changsheng/rules.json,由 scripts/rule_gate.py 在动作前拦(命中退出码 2,失败开放、只拦禁令)。
 
 ChangSheng treats your rules as **memory too** — the most important kind. Two layers make them stick:
 
@@ -164,9 +157,8 @@ The gate reads the tool name + input from stdin, checks it against your rules, a
 The gate is pure stdlib, fails open (no rules file → pass), and writes nothing. It only ever blocks *prohibitions* (never / don't / always-ask-first) — positive rules ("always do X") are carried by the alignment layer, since an action gate cannot enforce them mechanically.
 
 ## Handover protocol
-**中文**:说一句「handover」就把 .changsheng/handover.md 写出来(✅ 做完 / 📌 遗留 / 🔗 指针 / ➡️ 下一步);新会话读一次即删;任何提醒(含预备提醒)发出前必须先刷新它,只有主会话能写。
 
-Switching sessions is only free if the *next* session knows where the last one stopped. Say **"handover"** (or "交接/收尾") at any task break — a natural stopping point, a finished task, or when a context nudge suggests switching — and the agent writes `.changsheng/handover.md` from the template (assets/handover-template.md): ✅ done (what matters next) · 📌 leftover (what's waiting, on whom) · 🔗 pointers (files/tasks that anchor it) · ➡️ next step. Each new handover **overwrites** the previous one; recovery reads it once and **deletes it** (step 6) — a consumed handover must never linger as a stale pointer.
+Switching sessions is only free if the *next* session knows where the last one stopped. Say **"handover"** at any task break — a natural stopping point, a finished task, or when a context nudge suggests switching — and the agent writes `.changsheng/handover.md` from the template (assets/handover-template.md): ✅ done (what matters next) · 📌 leftover (what's waiting, on whom) · 🔗 pointers (files/tasks that anchor it) · ➡️ next step. Each new handover **overwrites** the previous one; recovery reads it once and **deletes it** (step 6) — a consumed handover must never linger as a stale pointer.
 
 The nudge bands above are the hard rule: **any nudge — pre-nudge or full nudge — goes out only after `.changsheng/handover.md` has been refreshed** (see Context threshold nudges). A nudge without a ready handover is just anxiety, not a safe suggestion. Recovery reads the handover if present (step 6); authority always stays with todos/journal, the handover is the fast pointer.
 
@@ -176,7 +168,6 @@ Two more rules keep the handover trustworthy when it matters most:
 - **Single writer.** Only the interactive main session writes the handover. Sub-agents, background workers and scheduled jobs never write it — with several writers each holding its own idea of "the current state", the last one to finish silently overwrites the others.
 
 ## Dreaming — the write side (every 3 days)
-**中文**:写侧——每 3 天把内容面理一遍(同类归并 / 相似辨清 / 过期清理 / 新增归位 / 存疑上抛),每类都带可核判据,产物是一页梦报;本技能只给纪律与判据,不新建任何定时任务或脚本。
 
 Recovery is the read side; dreaming is the write side — the same memory, the other half.
 
@@ -200,7 +191,6 @@ Source note: this borrows the ecosystem's content-side idea (tidy the memory its
 engineering; nothing here depends on another implementation.
 
 ## Manual discovery fallback (Python unavailable)
-**中文**:没有 Python 时的手工找法——规则 / 身份看 CLAUDE.md、AGENTS.md、.cursor/rules;待办看 TODO.md / todo.txt / tasks.md;日志取 journal、logs、notes 下最新的 YYYY-MM-DD.*。
 
 Look for, in order (the script header candidate constants are authoritative — this is a summary):
 
@@ -210,7 +200,6 @@ Look for, in order (the script header candidate constants are authoritative — 
 - **profile**: only if you configured one
 
 ## Files
-**中文**:文件清单——scripts/memory_index.py(变更索引)+ scripts/rule_gate.py(可选动作闸门)、assets/ 两个模板、config.example.yaml;产物落 .changsheng/ 与 memory_index.md(_state.json)。
 
 - `scripts/memory_index.py` — discovery + change-index generator (pure stdlib; `--discover` / `--list` / `--demo` / `--mode internal|auto|manual`)
 - `scripts/rule_gate.py` — optional action-time guardrail (reads `.changsheng/rules.json`; `--check "desc"` or PreToolUse stdin; `--demo`)
@@ -220,7 +209,6 @@ Look for, in order (the script header candidate constants are authoritative — 
 - Outputs: `.changsheng/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.changsheng/rules.json` + `.changsheng/handover.md`
 
 ## Security
-**中文**:安全——发现只按文件名扫(不看内容),索引只哈希你列出的文件,从不改你的记忆文件,什么都不上传;纯 Python 标准库,PyYAML 可选。
 
 - Discovery scans candidate paths by **name only** (metadata, no content) and writes `.changsheng/discovery.json`; the index reads and hashes only files you listed (roles + extras)
 - Never writes your memory files themselves — its own outputs are limited to `.changsheng/discovery.json`, the index md + state json, plus two optional files the agent maintains at your request: `.changsheng/rules.json` (your extracted rules, for the optional gate) and `.changsheng/handover.md` (your one-shot handover note, deleted after being read)
@@ -228,7 +216,6 @@ Look for, in order (the script header candidate constants are authoritative — 
 - Python standard library only. PyYAML optional: when absent, a built-in fallback parser reads the config (nested `roles:`, extras, flat `role_*` keys) — no silent config loss
 
 ## Roadmap (managed edition)
-**中文**:路线图——自动用户画像(偏好 / 习惯)、跨设备同步 + 网页控制台、一键部署;不想自己配就等托管版(零配置、持续更新)。
 
 - Auto user-profiling (preferences / habits)
 - **0.6.0 — Dreaming (write side) + a Chinese line under every section.**
@@ -236,6 +223,5 @@ Look for, in order (the script header candidate constants are authoritative — 
 - One-click deploy — don't want to self-configure? Managed edition = zero-setup, full system, continuous updates. → [Managed edition entry: TBD]
 
 ## License
-**中文**:许可——MIT-0,可自由使用、修改与出售。
 
 MIT-0 — free to use, modify, and sell.

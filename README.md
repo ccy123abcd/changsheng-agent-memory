@@ -172,11 +172,39 @@ No. Everything is local — discovery is name-only, the index hashes files you l
 
 **Don't want to self-configure?** The managed edition = zero-setup, full system, continuous updates. → [Managed edition: TBD]
 
-## Also by the same team (TXJ · 天玄镜)
+## Also by the same team (TXJ · Tianxuanjing)
 
 - **[Mode Switch Kit](https://github.com/ccy123abcd/mode-switch-machine-stack)** — one command flips your whole machine stack (VPN, background agents, local services, model tier) from a single YAML mode matrix. Its watchdogs repair the current mode and never revive what you switched off.
 
 ChangSheng and Mode Switch Kit are two blocks of the same private-assistant setup (memory and context recovery, todos, multi-agent gateways, watchdogs), published separately so you can evaluate one at a time. More blocks are coming, and eventually they ship as a single package — installing one is the cheap way to see whether the rest is for you.
+
+## Paid services (optional)
+
+Everything in this repository is free (MIT-0) — use it, fork it, ship it. No purchase required, ever.
+
+We also take on a small number of **managed edition** engagements for teams that want the whole system, not just the skill:
+
+| | Free skeleton (this skill) | Managed edition |
+|---|---|---|
+| One line | Recover state before work starts, at ~1/3 the token cost | Memory that grows, cleans and indexes itself |
+| Pain it fixes | A new session is amnesia — you re-explain everything | The more it remembers, the messier it gets; nothing gets written down |
+| Read side (recovery) | ✅ three-layer + change index, ~70% fewer re-reads | ✅ same, with thresholds tuned to your real volume |
+| Write side (how memory gets in) | ⚠️ half — periodic tidy-up, triggered by you | ✅ automatic: facts, decisions and preferences captured as they happen |
+| Handover | ✅ one command | ✅ handover + persistence + archive, nothing dropped |
+| Rules | ✅ action-time gate (non-zero exit blocks the action) | ✅ plus tiered approval: small changes run, big ones get reviewed and verified |
+| Knowledge base | ❌ not covered | ✅ four-layer sync, machine-checked |
+| Multi-agent / multi-person | ❌ not covered | ✅ ownership matrix + dispatch / receipt / acceptance loop |
+| What you get | a skill folder, works out of the box | a running system on your own machine (remote or on-premise) |
+
+- **Full memory system rollout** — we connect the memory you already have (notes, chat logs, private files) and stand up a system on **your own machine** that grows, cleans and indexes itself. Deliverable: a running setup + an operations guide + one month of support.
+- **Agent system build-out** — you provide a machine and one real use case; we build the whole stack (memory + role split + automation) until it runs. Deliverable: a running setup + an operations guide.
+- **Short-term rental pricing & operations** — connect your listing data; we produce actionable pricing rules and a daily operations checklist. Deliverable: a rules document + first-month support.
+
+We do not take: fully managed operations, revenue guarantees, or decisions made on your behalf. Pricing is quoted per engagement.
+
+**Model requirements (managed edition):** a frontier cloud model — Claude Sonnet-class / GPT-4o-class / DeepSeek V3-class or better. Context window **64K tokens or more** (hard requirement). Small local models (7B–14B) and retired models are not supported.
+
+**Get a quote** — open an issue in this repository titled `service inquiry` with your setup and timeline, or email **tianxuanjingchangsheng@gmail.com**.
 
 ## License
 
@@ -184,6 +212,6 @@ MIT-0 — free to use, modify, and sell.
 
 ---
 
-*Crafted with ❤ by TXJ · 天玄镜 (Tianxuanjing)*  
+*Crafted with ❤ by TXJ · Tianxuanjing*  
 
 ⭐ Found this useful? Star the repo — it helps others find it. Found a bug? [Open an issue](https://github.com/ccy123abcd/changsheng-agent-memory/issues).
