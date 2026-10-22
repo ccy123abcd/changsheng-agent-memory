@@ -50,6 +50,17 @@ output_state: memory_index_state.json
 # Display language of the generated index: en (default when absent) | zh.
 lang: en
 
+# ── Review ledger (optional) ────────────────────────────────────────────────
+# The always-read layer is a budget, not a wish list. `memory_ledger.py` keeps
+# one row per entry in `.changsheng/ledger.json` with:
+#   why · review_by (YYYY-MM-DD) · max_age_days · action_on_expiry
+# and reports missing files, incomplete rows, overdue reviews, stale rows and
+# budget overruns (exit code 1 on any issue).
+#   python scripts/memory_ledger.py --init     # create the ledger from discovery
+#   python scripts/memory_ledger.py --check    # check it
+# Budgets live in the ledger file itself (budget_bytes / target_bytes), not
+# here — the ledger is the table that owns its own limits.
+
 # Context-switch nudge thresholds (optional, percentages, ascending). The agent
 # checks context usage and nudges you to start a fresh session as usage climbs —
 # before any nudge it refreshes .changsheng/handover.md so switching loses nothing.

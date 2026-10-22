@@ -6,7 +6,7 @@
 
 **Cross-session memory recovery for AI agents. Restore state in ~70% fewer tokens (~55-75% cumulative when the host already injects identity) — and switch contexts anytime, at any task boundary, without losing your agent's memory.**
 
-![version](https://img.shields.io/badge/version-0.6.0-blue)
+![version](https://img.shields.io/badge/version-0.99.0-blue)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
 ![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw-lightgrey)
 ![deps](https://img.shields.io/badge/deps-zero-orange)
@@ -18,8 +18,15 @@ ChangSheng hands your agent a **shift handover** before it starts working:
 - **Always reads** the core layer — identity, rules, user profile, latest todos, latest work log (nothing important silently dropped)
 - **Re-states your rules** every session (rules alignment) — the do's and don'ts you set stay loaded, and stay followed
 - **Checks a change index** (auto-generated, hash-based) before re-reading secondary files — unchanged files cost ~0
+- **Keeps a review ledger** — every always-read file carries a byte budget, a review date and an expiry action, so a stale rule is flagged instead of quoted as current
+- **Finds the reason behind a decision** — one command searches todos, logs, notes and the archive for *why* something was decided, not just where a word appears
 - **Defers everything else** until it is actually needed
 - **One-line handover** — say "handover" at a task break; the next session picks up exactly there
+
+**0.99.0 publishes the design, not just the scripts.** The method behind
+ChangSheng — four layers, whose/when tagging, entry points with checks, budget
+rules — is in [`references/memory-system.md`](references/memory-system.md). Copy
+the shape into your own setup, with any file layout and any tool.
 
 Measured on our own production system: recovery drops from **~44K to ~12K tokens** (~70% less). When the host already injects identity memory (e.g. Hermes), the duplicated read is skipped automatically — **~55-75% cumulative savings** (measured 2026-09-04).
 
@@ -135,7 +142,11 @@ changsheng/
 ├── config.example.yaml      # configuration template
 ├── scripts/
 │   ├── memory_index.py      # change-index generator (pure stdlib, zero deps)
+│   ├── memory_ledger.py     # must-read budget + review ledger (pure stdlib)
+│   ├── recall.py            # "why did we decide this?" search across four surfaces
 │   └── rule_gate.py         # optional action-time guardrail (reads .changsheng/rules.json)
+├── references/
+│   └── memory-system.md     # the method: four layers, whose/when tags, entry points, budget rules
 ├── assets/
 │   └── handover-template.md # handover note template
 ├── CHANGELOG.md
@@ -143,9 +154,29 @@ changsheng/
 └── version
 ```
 
+### The two new doors (0.99.0)
+
+```bash
+# ledger — the must-read layer as a budget with expiry
+python scripts/memory_ledger.py --init     # build .changsheng/ledger.json from what was discovered
+python scripts/memory_ledger.py --check    # missing files · incomplete rows · overdue reviews · stale rows · over budget
+#   each row: why · review_by · max_age_days · action_on_expiry
+#   hard byte budget 30000 (target 25000) — adding a row means naming a row that leaves
+
+# recall — the reason behind a decision, across four surfaces
+python scripts/recall.py "why we chose SQLite"
+python scripts/recall.py handover --paths notes journal
+#   surfaces: todos · journal · notes · archive; every surface is reported even with zero hits
+#   exit 3 = nothing could be searched at all (never confused with "not found")
+```
+
+Both are pure stdlib, zero dependencies, offline. The ledger writes only its
+own JSON file; recall writes nothing at all.
+
 ## Security
 
-- Discovery scans candidate paths by name only (metadata — no content); the index reads and hashes only files you listed (roles + extras). Never writes your memory files themselves — its own outputs are `.changsheng/discovery.json`, index md + state json, plus two optional agent-maintained files: `.changsheng/rules.json` (extracted rules for the optional gate) and `.changsheng/handover.md` (one-shot handover note, deleted after being read)
+- Discovery scans candidate paths by name only (metadata — no content); the index reads and hashes only files you listed (roles + extras). Never writes your memory files themselves — its own outputs are `.changsheng/discovery.json`, index md + state json, plus three optional agent-maintained files: `.changsheng/ledger.json` (your review table), `.changsheng/rules.json` (extracted rules for the optional gate) and `.changsheng/handover.md` (one-shot handover note, deleted after being read)
+- `recall.py` reads text files under the directories you point it at and prints matching lines back to you — it writes nothing and sends nothing
 - Nothing leaves your machine — no remote install pipelines, no script-to-shell execution
 - Python standard library only. PyYAML optional: when absent, a built-in fallback parser reads the config (nested `roles:`, extras, flat `role_*` keys) — no silent config loss
 
@@ -166,8 +197,9 @@ No. Everything is local — discovery is name-only, the index hashes files you l
 ## Roadmap (managed edition)
 
 - Auto user-profiling (preferences / habits)
-- Cross-device sync + web console
+- **0.99.0 — The design, published: `references/memory-system.md` (four layers, whose/when tags, entry points, budget rules) + `memory_ledger.py` (budget & expiry) + `recall.py` (reason-recall across four surfaces).**
 - **0.6.0 — Dreaming (write side) + Chinese reachability lines** (2026-09-19)
+- Cross-device sync + web console
 - One-click deploy
 
 **Don't want to self-configure?** The managed edition = zero-setup, full system, continuous updates. → [Managed edition: TBD]

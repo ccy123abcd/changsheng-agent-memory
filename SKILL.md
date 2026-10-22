@@ -1,6 +1,6 @@
 ---
 name: changsheng-agent-memory
-version: 0.6.0
+version: 0.99.0
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery cost ~70%\n(~55-75% cumulative when the host already injects identity). Pure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n"
 description_en: "Cross-session memory recovery: a new chat never cold-starts — identity, rules and todos stay loaded, and a change index cuts the redundant re-reads (~70% cheaper recovery). Pure local, zero deps."
 author: TXJ · 天玄镜 (Tianxuanjing)
@@ -15,7 +15,7 @@ metadata:
 
 **Use when**: a new chat asks where you left off · context is filling up mid-task · the user says "I already told you this" · you re-read the same identity/rules/todos files every session · session start burns tens of thousands of tokens · you hand a long task to a fresh session.
 
-**Key commands**: `python scripts/memory_index.py` (discover + write the change index) · `python scripts/rule_gate.py --check "<action>"` (optional action-time rule gate) · say **"handover"** to snapshot where work stands.
+**Key commands**: `python scripts/memory_index.py` (discover + write the change index) · `python scripts/memory_ledger.py --check` (review the must-read budget) · `python scripts/recall.py "why we chose X"` (find the reason behind a decision) · `python scripts/rule_gate.py --check "<action>"` (optional action-time rule gate) · say **"handover"** to snapshot where work stands.
 
 **Cost**: recovery ~44K → ~12K tokens (~70% less); ~55-75% cumulative when the host already injects identity (measured 2026-09-04). Pure local, zero API cost.
 
@@ -36,6 +36,8 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 
 - 🧠 **No more lost context**: identity, rules, todos always loaded — nothing important silently dropped; new sessions resume where you left off
 - 📏 **Rules remembered**: the do's and don'ts you told your agent are re-stated at every recovery — and (where your platform supports hooks) enforced at action time. "It keeps forgetting I told it not to…" — that ends here
+- 🧾 **Memory that survives review**: a ledger with a byte budget, a review date and an expiry action for every always-read file — so a stale rule gets flagged instead of being quoted as current
+- 🔎 **The reason behind a decision**: one command finds *why* you chose something, across todos, logs, notes and the archive — not just where the word appears
 - 🔁 **One-line handover**: say "handover" at any task break; the next session starts exactly where you stopped
 - ⚡ **Fast + cheap**: recovery cost ~44K → ~12K tokens (~70% less); with host-injected identity skipped, ~55-75% cumulative (measured 2026-09-04)
 - 🔒 **100% local**: pure local scripts, zero API cost, nothing leaves your machine
@@ -167,6 +169,86 @@ Two more rules keep the handover trustworthy when it matters most:
 - **Refresh before you report.** Anything that *ends* a working stretch — a wrap-up message, a stage summary, a "done" report — refreshes `.changsheng/handover.md` **before** it goes out. A report sent on top of a stale handover is a lost thread: the user reads "done", starts a fresh session, and lands on the previous state.
 - **Single writer.** Only the interactive main session writes the handover. Sub-agents, background workers and scheduled jobs never write it — with several writers each holding its own idea of "the current state", the last one to finish silently overwrites the others.
 
+## The ledger — memory that survives review
+
+Recovery reads a fixed set of files every session. That set is a **budget**, and
+this is the table that keeps it honest.
+
+`scripts/memory_ledger.py` keeps one row per always-read memory:
+
+| field | meaning |
+|---|---|
+| `why` | why this entry earns a place in every session |
+| `review_by` | the date it gets looked at again |
+| `max_age_days` | how stale it may get before it counts as expired |
+| `action_on_expiry` | what happens then — demote it, archive it, or ask again |
+
+```bash
+python scripts/memory_ledger.py --init     # create .changsheng/ledger.json from what was discovered
+python scripts/memory_ledger.py --check    # missing files, incomplete rows, overdue reviews, stale rows, budget overrun
+```
+
+Two rules make it bite, and the agent must enforce them, not just the script:
+
+- **Adding a row means naming a row that leaves.** The must-read layer has a
+  hard byte budget (30000 by default, target waterline 25000). A net-zero edit
+  is the only kind that keeps the layer affordable.
+- **A row with no expiry is a row that will never be questioned.** Every row
+  carries a review date and an action. Stale rows are flagged, never reported
+  as current.
+
+The check exits non-zero on any issue, so it can be wired into a hook — the
+same way `rule_gate.py` is. It never edits your memory files.
+
+## Recall — find the reason behind a decision
+
+The question memory systems answer worst is *"why did we decide this?"*. A grep
+tells you a string appears somewhere; it does not tell you what you concluded,
+when, or on what grounds.
+
+```bash
+python scripts/recall.py "why we chose SQLite"     # all keywords must match one line
+python scripts/recall.py handover --paths notes journal
+```
+
+It searches the four surfaces where conclusions actually get written — open
+items, dated logs, notes/decisions, and the archive — and prints hits with
+file and line. Two properties are deliberate:
+
+- **Every surface is reported even when it had no hits**, so silence is never
+  confused with "never looked".
+- **If nothing could be searched at all, that is an error (exit 3), not an
+  answer.** "Not found" and "not looked" never share an exit code.
+
+Read-only, pure stdlib, no network.
+
+## What kind of memory is this?
+
+Where a memory lives is decided by two questions, and they are independent of
+how deep it is stored: **whose** it is (yours or the user's) and **which way
+time points** (past / now / future / standing). One fact, one tag, one home.
+
+| Whose | Direction | Typical content | Belongs in |
+|---|---|---|---|
+| yours | now | what you are doing right now | working layer / handover |
+| yours | past | projects finished, lessons hit | reference layer |
+| yours | future | what you will do next | open items |
+| yours | standing | your operating rules | always-on layer |
+| the user's | now | what they just told you | working layer |
+| the user's | past | their history, prior decisions | reference layer |
+| the user's | future | their plans, deadlines | open items |
+| the user's | standing | who they are, how they want to work | always-on layer |
+| mutual | standing | how you work together, what is off-limits | always-on layer, written as situation → action |
+
+The last row is the one most systems skip, and the one users notice most: a
+rule that exists only as prose in a document is not applied. Write it as
+*situation → what to do*.
+
+The full method — the four layers, the entry points (each event gets one
+landing place and one check that it happened), the budget rules, and what this
+does not solve — is in [`references/memory-system.md`](references/memory-system.md).
+Read it once; it is the design, the scripts are conveniences.
+
 ## Dreaming — the write side (every 3 days)
 
 Recovery is the read side; dreaming is the write side — the same memory, the other half.
@@ -202,22 +284,27 @@ Look for, in order (the script header candidate constants are authoritative — 
 ## Files
 
 - `scripts/memory_index.py` — discovery + change-index generator (pure stdlib; `--discover` / `--list` / `--demo` / `--mode internal|auto|manual`)
+- `scripts/memory_ledger.py` — must-read budget + review ledger (reads/writes `.changsheng/ledger.json`; `--init` / `--check` / `--demo`)
+- `scripts/recall.py` — "why did we decide this?" search across todos / journal / notes / archive (read-only; exit 3 = nothing could be searched)
 - `scripts/rule_gate.py` — optional action-time guardrail (reads `.changsheng/rules.json`; `--check "desc"` or PreToolUse stdin; `--demo`)
+- `references/memory-system.md` — the design behind the scripts: four layers, the whose/when tags, entry points, budget rules
 - `assets/handover-template.md` — handover note template
 - `assets/agents-snippet.md` — paste-in block for your project's instruction file (Hermes / OpenClaw / DeepSeek Harness), so recovery runs at session start with no hook
 - `config.example.yaml` — configuration template (mode / roles / extras)
-- Outputs: `.changsheng/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.changsheng/rules.json` + `.changsheng/handover.md`
+- Outputs: `.changsheng/discovery.json` + `memory_index.md` + `memory_index_state.json` + (optional) `.changsheng/ledger.json` + `.changsheng/rules.json` + `.changsheng/handover.md`
 
 ## Security
 
 - Discovery scans candidate paths by **name only** (metadata, no content) and writes `.changsheng/discovery.json`; the index reads and hashes only files you listed (roles + extras)
-- Never writes your memory files themselves — its own outputs are limited to `.changsheng/discovery.json`, the index md + state json, plus two optional files the agent maintains at your request: `.changsheng/rules.json` (your extracted rules, for the optional gate) and `.changsheng/handover.md` (your one-shot handover note, deleted after being read)
+- Never writes your memory files themselves — its own outputs are limited to `.changsheng/discovery.json`, the index md + state json, plus three optional files the agent maintains at your request: `.changsheng/ledger.json` (your review table), `.changsheng/rules.json` (your extracted rules, for the optional gate) and `.changsheng/handover.md` (your one-shot handover note, deleted after being read)
+- `recall.py` reads text files under the directories you point it at and prints matching lines back to you — it writes nothing and sends nothing
 - Nothing is uploaded anywhere — fully local, no remote install pipelines, no script-to-shell execution
 - Python standard library only. PyYAML optional: when absent, a built-in fallback parser reads the config (nested `roles:`, extras, flat `role_*` keys) — no silent config loss
 
 ## Roadmap (managed edition)
 
 - Auto user-profiling (preferences / habits)
+- **0.99.0 — The design, published: memory ledger (budget + expiry), reason-recall across four surfaces, and the full method in `references/memory-system.md`.**
 - **0.6.0 — Dreaming (write side) + a Chinese line under every section.**
 - Cross-device sync + web console
 - One-click deploy — don't want to self-configure? Managed edition = zero-setup, full system, continuous updates. → [Managed edition entry: TBD]

@@ -23,9 +23,10 @@ At the start of every new session, before anything else, follow the `changsheng-
 2. read the always-loaded layer in full
 3. hash-check the conditional layer and read only what changed
 4. restate the imperative rules (do / don't) before acting
-5. reply with one short line so the user knows recovery ran — e.g. "Memory recovered — ready."
+5. if a ledger exists (`.changsheng/ledger.json`), run `python scripts/memory_ledger.py --check` and report any expired or over-budget rows
+6. reply with one short line so the user knows recovery ran — e.g. "Memory recovered — ready."
 
-Then handle the user's request. Do not skip step 5: it is how the user can tell recovery happened.
+Then handle the user's request. Do not skip step 6: it is how the user can tell recovery happened.
 ```
 
 ## If your platform has no workspace instruction file

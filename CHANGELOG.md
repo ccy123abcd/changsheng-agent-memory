@@ -4,6 +4,40 @@
 
 ## [Unreleased]
 
+## [0.99.0] - 2026-10-22
+
+### Added
+- **The design, published.** `references/memory-system.md` — the method behind
+  the scripts, written so it can be copied into any agent setup with any file
+  layout: the four layers (raw / working / reference / always-on) and the rule
+  that one fact has exactly one home; the two orthogonal questions that decide
+  where a memory lives (whose it is · which way time points); entry points
+  (each event gets one landing place *and* one check that it happened);
+  the budget rules; and an explicit "what this does not solve".
+- **`scripts/memory_ledger.py`** — the always-read layer as a reviewable
+  budget. One row per entry with `why`, `review_by`, `max_age_days` and
+  `action_on_expiry`. `--check` reports missing files, incomplete rows,
+  overdue reviews, stale rows and budget overruns, and exits non-zero so it
+  can be wired into a hook. Hard byte budget 30000, target waterline 25000.
+  Writes only its own `.changsheng/ledger.json`; never edits your memory files.
+- **`scripts/recall.py`** — "why did we decide this?" across four surfaces
+  (todos, journal, notes, archive), printing file and line. Every surface is
+  reported even when it had zero hits, and "nothing could be searched" exits 3
+  so it is never confused with "not found". Read-only, pure stdlib.
+
+### Changed
+- SKILL.md / README gained a "What kind of memory is this?" section (the
+  whose/when table), a ledger section and a recall section; the key-command
+  line, the file list, the security notes and the roadmap mention the two new
+  scripts.
+- Version bumped to 0.99.0 (SKILL.md frontmatter, `version`, README badge).
+
+### Migration
+- No behaviour change: same recovery flow, same commands, same config keys,
+  same handover protocol. The two new scripts are optional — install and use
+  them when you want a budget on your always-read layer, or want to look up
+  the reason behind an old decision. Nothing to do when upgrading from 0.6.0.
+
 ## [0.6.0] - 2026-09-19
 
 ### Added
