@@ -4,7 +4,7 @@
   <img src="assets/banner.png" alt="ChangSheng — cross-session memory recovery for AI agents" width="100%">
 </p>
 
-**Cross-session memory recovery for AI agents. Restore state in ~70% fewer tokens (~55-75% cumulative when the host already injects identity) — and switch contexts anytime, at any task boundary, without losing your agent's memory.**
+**Your agent's memory, decoupled from the model.** Switch models mid-project — DeepSeek today, MiniMax tomorrow, a local 27B next month — and your agent still knows who you are, what the rules are, and where work left off. Recovery costs ~70% fewer tokens than naive re-reading (~55–75% cumulative when the host already injects identity).
 
 ![version](https://img.shields.io/badge/version-0.99.0-blue)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
@@ -84,6 +84,11 @@ Existing memory/marketplace skills are mostly about **storing** memories. Nobody
 
 The missing piece is a **change index**: a daily hash pass that tells the agent *what actually changed* since the last session. With it, recovery is **neither expensive nor risky**. That index is what this skill automates (`scripts/memory_index.py`, pure stdlib, ~0 cost).
 
+## Why is this free?
+ChangSheng is the memory layer of the [Tianxuanjing agent system](https://aivaultpro.com) — a dozen-plus agents, dozens of sessions a day, in real production use. We open-sourced the method (MIT) because a memory system gets better the more people run it, and because we'd rather earn your trust than your license fee.
+
+There's no upsell inside the skill. The paid side is the managed system: hosted agents, multi-agent orchestration, and an H5 dashboard — with your data backed up to your own cloud drive and portable at any time. Same memory, zero re-setup when you switch models.
+
 ## How it works
 
 ```mermaid
@@ -106,6 +111,12 @@ flowchart TD
 `scripts/memory_index.py` hashes every L2-tracked file (md5 + 24h freshness window) and writes a human-readable `memory_index.md`. No index → all-or-nothing. With an index → read the few files that changed.
 
 > Honest numbers: ~12K is our measured tiered-recovery cost vs ~44K naive (~70% less). ~55-75% cumulative is our measured range for hosts that already inject identity (the duplicate identity read is skipped). Highest-value users: heavy multi-session automation (many sessions/day).
+
+## v0.99 — memory that never gets lost, three ways
+
+- **Memory ledger** (`scripts/memory_ledger.py`) — every long-lived memory carries four fields: why it exists, when it's reviewed, how long it lives, what happens at expiry. Hard budget cap (30 KB). Nothing rots silently; the check reports missing files, missing fields, overdue reviews, expired entries, and over-budget ledgers.
+- **Provenance recall** (`scripts/recall.py`) — "why did we decide this?" answered in seconds, with file names and line numbers, across todos, logs, notes/decisions, and archives. Every surface reports even on zero hits (silence is never confused with not searched); all-four-empty is its own exit code, never confused with "didn't look."
+- **The method, written down** (`references/memory-system.md`) — the full system: one home per fact, two orthogonal questions (whose × which time direction), an entry table for every event type, budget rules, honest-reporting discipline — and a section on what this method does *not* solve.
 
 ## Configuration (optional)
 
@@ -198,17 +209,21 @@ No. Everything is local — discovery is name-only, the index hashes files you l
 
 - Auto user-profiling (preferences / habits)
 - **0.99.0 — The design, published: `references/memory-system.md` (four layers, whose/when tags, entry points, budget rules) + `memory_ledger.py` (budget & expiry) + `recall.py` (reason-recall across four surfaces).**
+- **1.0 = the write side closes the loop.** 0.99 ships the read side (recovery) plus the method; 1.0 is when a memory also *enters* the system without you writing it down: capture (facts, decisions, preferences) happens as you work, the ledger's expiry actions actually run, and the archived layer is searchable across machines. Concrete bar for 1.0: (a) a write-side capture path with a documented entry point for every event type, (b) the ledger's `action_on_expiry` executed by a real runner rather than only reported, (c) cross-machine recall over the archive, (d) the recovery-cost measurement re-run on the 1.0 build and published as a number. Until those four hold, the version stays 0.99 — 0.99 is not a placeholder for 1.0, it's a complete read-side skill.
 - **0.6.0 — Dreaming (write side) + Chinese reachability lines** (2026-09-19)
 - Cross-device sync + web console
 - One-click deploy
 
 **Don't want to self-configure?** The managed edition = zero-setup, full system, continuous updates. → [Managed edition: TBD]
 
-## Also by the same team (TXJ · Tianxuanjing)
+## Going further
 
-- **[Mode Switch Kit](https://github.com/ccy123abcd/mode-switch-machine-stack)** — one command flips your whole machine stack (VPN, background agents, local services, model tier) from a single YAML mode matrix. Its watchdogs repair the current mode and never revive what you switched off.
+ChangSheng is the memory layer. [AI Vault Pro](https://aivaultpro.com) is the full system: your agents hosted and orchestrated, memory included, backed up daily to your own cloud drive — leave anytime and take everything with you. Switch models whenever you like; the memory stays.
 
-ChangSheng and Mode Switch Kit are two blocks of the same private-assistant setup (memory and context recovery, todos, multi-agent gateways, watchdogs), published separately so you can evaluate one at a time. More blocks are coming, and eventually they ship as a single package — installing one is the cheap way to see whether the rest is for you.
+Also by the same team: **Mode Switch Kit** — one command flips your whole machine stack (VPN, background agents, local services, model tier) from a single YAML mode matrix.
+
+
+
 
 ## Paid services (optional)
 
