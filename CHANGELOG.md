@@ -31,6 +31,18 @@
   line, the file list, the security notes and the roadmap mention the two new
   scripts.
 - Version bumped to 0.99.0 (SKILL.md frontmatter, `version`, README badge).
+- **README marketing copy refreshed** (reviewed copy, shipped as reviewed):
+  the hero line now leads with "your agent's memory, decoupled from the model";
+  a new **Why is this free?** section states why the method is MIT and where the
+  paid side actually is; a new **v0.99 — memory that never gets lost, three ways**
+  section describes the three new pieces in user terms; the closing section is
+  now **Going further** (full system + the sibling Mode Switch Kit).
+- **The 1.0 bar is written down.** The roadmap now says exactly what 1.0 means
+  — the write side closes the loop: capture without writing things down by hand,
+  the ledger's expiry actions actually running, cross-machine recall over the
+  archive, and the recovery-cost measurement re-run on the 1.0 build. Until
+  those four hold, the version stays 0.99 (0.99 is a complete read-side skill,
+  not a placeholder).
 
 ### Migration
 - No behaviour change: same recovery flow, same commands, same config keys,
