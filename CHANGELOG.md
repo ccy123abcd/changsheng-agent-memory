@@ -4,7 +4,11 @@
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-24
+## [1.0.1] - 2026-10-24
+
+> 1.0.0 was never publicly available: its first package bundle accidentally
+> included local article drafts, so it was withdrawn before release. 1.0.1 ships
+> the same source with only the skill files in the bundle.
 
 ### Changed
 - **Tier names flipped to match reading order.** The always-read layer is now
