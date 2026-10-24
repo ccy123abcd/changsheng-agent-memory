@@ -6,7 +6,7 @@
 
 **Your agent's memory, decoupled from the model.** Switch models mid-project — DeepSeek today, MiniMax tomorrow, a local 27B next month — and your agent still knows who you are, what the rules are, and where work left off. Recovery reads **8,669 tokens** per session. Restoring all sixteen memory systems in full would cost **685,560** — the tiered read is **1.3% of a full restore, 98.7% less**.
 
-![version](https://img.shields.io/badge/version-0.99.0-blue)
+![version](https://img.shields.io/badge/version-1.0.0-blue)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
 ![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw-lightgrey)
 ![deps](https://img.shields.io/badge/deps-zero-orange)
@@ -23,7 +23,7 @@ ChangSheng hands your agent a **shift handover** before it starts working:
 - **Defers everything else** until it is actually needed
 - **One-line handover** — say "handover" at a task break; the next session picks up exactly there
 
-**0.99.0 publishes the design, not just the scripts.** The method behind
+**This release publishes the design, not just the scripts.** The method behind
 ChangSheng — four layers, whose/when tagging, entry points with checks, budget
 rules — is in [`references/memory-system.md`](references/memory-system.md). Copy
 the shape into your own setup, with any file layout and any tool.

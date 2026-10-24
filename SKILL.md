@@ -1,6 +1,6 @@
 ---
 name: changsheng-agent-memory
-version: 0.99.0
+version: 1.0.0
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery to 1.3% of a full restore (98.7% fewer tokens).\nPure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n"
 description_en: "Cross-session memory recovery: a new chat never cold-starts — identity, rules and todos stay loaded, and a change index cuts recovery to 1.3% of a full restore (98.7% fewer tokens). Pure local, zero deps."
 author: TXJ · 天玄镜 (Tianxuanjing)

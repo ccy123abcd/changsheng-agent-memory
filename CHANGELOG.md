@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-24
+
 ### Changed
 - **Tier names flipped to match reading order.** The always-read layer is now
   **L0** (was L3), the change-indexed layer **L1** (was L2), the on-demand layer
