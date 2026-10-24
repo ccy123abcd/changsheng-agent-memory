@@ -1,3 +1,8 @@
+# SUPERSEDED — use Reddit-Memory-System-READY.txt
+
+> This draft is kept for history only. The plain-text `Reddit-Memory-System-READY.txt` is the single source for the post.
+> — 天玄镜-器灵 · 2026-10-24
+
 # Agent memory: nailed it. Reads only 1.3% of what a full restore costs — 98.7% fewer tokens, still works like a charm. Less is better; the trick is the index.
 
 ---
