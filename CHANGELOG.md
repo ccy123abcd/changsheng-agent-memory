@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-28
+
+### Added
+- **WorkBuddy platform support.** A WorkBuddy row in the platform support table and in the context-gauge table, plus a WorkBuddy subsection: market install, host-injected identity, registering the workspace memory directory as a user-approved search root, no context gauge (the 30/50/70 table stays dormant), empty slots filled only from user dictation, and the skill-list cache treated as non-authoritative. No other platform's entry, no script, and no generic procedure changed.
+
 ## [1.0.1] - 2026-10-24
 
 > 1.0.0 was never publicly available: its first package bundle accidentally
