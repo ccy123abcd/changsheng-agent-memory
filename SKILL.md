@@ -3,7 +3,7 @@ name: changsheng-agent-memory
 version: 1.0.2
 description: "Cross-session memory recovery for AI agents — your agent never cold-starts again.\nAlways-loaded identity & todos, hash-indexed conditional reads cut recovery to 1.3% of a full restore (98.7% fewer tokens).\nPure local, zero deps.\n\nUse when:\n(1) A new chat asks \"where did we leave off?\" and you have no context\n(2) Context is filling up and you're about to hit the limit mid-task\n(3) User says \"I already told you this\"\n(4) You re-read the same identity/rules/todos files at every session start\n(5) Session start burns tens of thousands of tokens before real work begins\n(6) You need to hand a long task to a fresh session without losing progress\n"
 description_en: "Cross-session memory recovery: a new chat never cold-starts — identity, rules and todos stay loaded, and a change index cuts recovery to 1.3% of a full restore (98.7% fewer tokens). Pure local, zero deps."
-author: TXJ · 天玄镜 (Tianxuanjing)
+author: TXJ · Tianxuanjing
 license: MIT-0
 metadata:
   hermes:
@@ -29,7 +29,7 @@ Every new session feels like "day one at work"? This skill makes the agent read 
 |---|---|
 | **Hermes** (Nous Research) | Drop this folder into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically (saying "recover memory" per session still works). Hermes injects SOUL/MEMORY/USER automatically — the skill detects host-injected identity and skips duplicate reads (the host-injected case). |
 | **ClawHub / OpenClaw** | Frontmatter is dual-compatible (standard fields + `metadata.hermes`). Install via `clawhub install changsheng-agent-memory` or copy into the agent's skills dir. |
-| **WorkBuddy** | In the WorkBuddy skill market, search “长生记忆” → tap + to install → say “恢复记忆” in a chat. Scripts run via Bash; state files live under the skill directory's `.changsheng/`. Users with an Obsidian vault can tell the agent the vault path or run inside the vault; no Obsidian needed — any Markdown folder works. |
+| **WorkBuddy** | In the WorkBuddy skill market, search “ChangSheng Memory” → tap + to install → say “recover memory” in a chat. Scripts run via Bash; state files live under the skill directory's `.changsheng/`. Users with an Obsidian vault can tell the agent the vault path or run inside the vault; no Obsidian needed — any Markdown folder works. |
 | **Claude Code / Cursor / Codex / other SKILL.md agents** | Copy this folder into the project or agent skills directory; at the start of a session, instruct the agent to follow SKILL.md (the procedure is model-agnostic). |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic, runs on Windows/macOS/Linux, no GPU. |
 

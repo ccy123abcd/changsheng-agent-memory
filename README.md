@@ -4,11 +4,11 @@
   <img src="assets/banner.png" alt="ChangSheng — cross-session memory recovery for AI agents" width="100%">
 </p>
 
-**Your agent's memory, decoupled from the model.** Switch models mid-project — DeepSeek today, MiniMax tomorrow, a local 27B next month — and your agent still knows who you are, what the rules are, and where work left off. Recovery reads **8,669 tokens** per session. Restoring all sixteen memory systems in full would cost **685,560** — the tiered read is **1.3% of a full restore, 98.7% less**.
+**Your agent's memory, decoupled from the model.** Switch models mid-project — DeepSeek today, MiniMax tomorrow, a local 27B next month — and your agent still knows who you are, what the rules are, and where work left off. Recovery reads **8,669 tokens** per session. A naive full restore of all sixteen memory systems would cost **685,560** — the tiered read is **1.3% of a naive full restore, 98.7% less**.
 
-![version](https://img.shields.io/badge/version-1.0.1-blue)
+[![version](https://img.shields.io/github/v/tag/ccy123abcd/changsheng-agent-memory)](https://github.com/ccy123abcd/changsheng-agent-memory/tags)
 ![license](https://img.shields.io/badge/license-MIT--0-green)
-![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw-lightgrey)
+![platform](https://img.shields.io/badge/platform-Hermes%20%7C%20Claude%20Code%20%7C%20Cursor%20%7C%20OpenClaw%20%7C%20WorkBuddy-lightgrey)
 ![deps](https://img.shields.io/badge/deps-zero-orange)
 
 Every new session feels like "day one at work"? Your agent doesn't know who you are, what the rules are, or where work left off — so you re-explain everything, and it still drops things.
@@ -28,7 +28,7 @@ ChangSheng — four layers, whose/when tagging, entry points with checks, budget
 rules — is in [`references/memory-system.md`](references/memory-system.md). Copy
 the shape into your own setup, with any file layout and any tool.
 
-Measured on our own production system (on-disk, 2026-10-24): a session recovers in **8,669 tokens**. A full restore of all sixteen systems would cost **685,560 tokens** — **1.3% of that, 98.7% less**. Host-injected identity (e.g. Hermes) is counted separately (37,630 B) and never double-read.
+Measured on our own production system (on-disk, 2026-10-24): a session recovers in **8,669 tokens**. A naive full restore of all sixteen systems would cost **685,560 tokens** — **1.3% of that, 98.7% less**. Host-injected identity (e.g. Hermes) is counted separately (37,630 B) and never double-read.
 
 ### Why this changes your workflow: free context switches
 
@@ -43,12 +43,11 @@ Every switch costs a few thousand tokens to recover instead of tens of thousands
 ## Quick start
 
 ```bash
-# 1. get the skill
-git clone https://github.com/ccy123abcd/changsheng-agent-memory.git
-cp -r changsheng ~/.claude/skills/          # or your agent's skills dir
+# 1. get the skill (clone straight into the skills dir — no rename needed)
+git clone https://github.com/ccy123abcd/changsheng-agent-memory.git ~/.claude/skills/changsheng
+cd ~/.claude/skills/changsheng
 
 # 2. cold start (no config needed — discovery finds your layout)
-cd changsheng
 python scripts/memory_index.py --list .   # optional: preview what discovery picks
 python scripts/memory_index.py            # discover + write index (≈30s total)
 
@@ -58,6 +57,8 @@ python scripts/memory_index.py            # discover + write index (≈30s total
 # 4. self-test
 python scripts/memory_index.py --demo
 ```
+
+> Windows (PowerShell): use `$HOME\.claude\skills\changsheng` instead of `~/.claude/skills/changsheng`.
 
 ### Make it automatic (3 lines, 3 platforms)
 
@@ -72,6 +73,7 @@ hooks, no config. No instruction file in your project? Then just say "recover me
 |---|---|
 | **Hermes** (Nous Research) | Drop into the agent's `skills/` directory, then paste `assets/agents-snippet.md` into `.hermes.md` or `AGENTS.md` → recovery runs automatically. Hermes injects SOUL/MEMORY/USER itself, and the skill detects host-injected identity and skips duplicate reads (the host-injected case). |
 | **ClawHub / OpenClaw** | Dual-compatible frontmatter (standard + `metadata.hermes`). Install into the skills directory or via your hub client. |
+| **WorkBuddy** | In the WorkBuddy skill market, search “ChangSheng Memory” → tap + to install → say “recover memory” in a chat. Scripts run via Bash; state files live under the skill directory's `.changsheng/`. No Obsidian needed — any Markdown folder works. See SKILL.md for the WorkBuddy subsection (host-injected identity, no context gauge, user-approved search roots only). |
 | **Claude Code / Cursor / Codex** | Copy the folder into the project or agent skills directory (`~/.claude/skills/`, etc.); instruct the agent to follow SKILL.md at session start. |
 | **Any LLM, any OS** | Recovery logic is pure convention + one Python stdlib script — model-agnostic; Windows / macOS / Linux; no GPU. |
 
@@ -85,9 +87,9 @@ Existing memory/marketplace skills are mostly about **storing** memories. Nobody
 The missing piece is a **change index**: a daily hash pass that tells the agent *what actually changed* since the last session. With it, recovery is **neither expensive nor risky**. That index is what this skill automates (`scripts/memory_index.py`, pure stdlib, ~0 cost).
 
 ## Why is this free?
-ChangSheng is the memory layer of the [Tianxuanjing agent system](https://aivaultpro.com) — a dozen-plus agents, dozens of sessions a day, in real production use. We open-sourced the method (MIT) because a memory system gets better the more people run it, and because we'd rather earn your trust than your license fee.
+ChangSheng is the memory layer of the [Tianxuanjing agent system](https://aivaultpro.com) — a dozen-plus agents, dozens of sessions a day, in real production use. We open-sourced the method (MIT-0) because a memory system gets better the more people run it, and because we'd rather earn your trust than your license fee.
 
-There's no upsell inside the skill. The paid side is the managed system: hosted agents, multi-agent orchestration, and an H5 dashboard — with your data backed up to your own cloud drive and portable at any time. Same memory, zero re-setup when you switch models.
+There's no upsell inside the skill. Same memory, zero re-setup when you switch models.
 
 ## How it works
 
@@ -107,13 +109,41 @@ flowchart TD
 | **L0 Must-read** | identity / rules / user profile / latest todos / latest work log | Every new session — reliability anchor | small & fixed |
 | **L1 Conditional** | secondary files (roles, members, configs) | **Only if the auto-generated index flags a change**; otherwise just the index summary line | ≈0 ← savings live here |
 | **L2 On-demand** | detail docs / history | Only when actually needed | 0 |
-| **L3 Fallback** | whole corpus — keyword / full-text / semantic search | When the first three tiers miss | budgeted, with a timeout |
+| **L3 Fallback** | whole corpus — keyword / full-text search | When the first three tiers miss | budgeted, with a timeout |
 
 `scripts/memory_index.py` hashes every L1-tracked file (md5 + 24h freshness window) and writes a human-readable `memory_index.md`. No index → all-or-nothing. With an index → read the few files that changed.
 
-> Honest numbers (measured on disk, 2026-10-24): 8,669 tokens per session vs 685,560 for a full restore of all sixteen systems — 1.3%, or 98.7% less. The ~46 MB of raw material in the store is not on the restore path and is counted in neither figure. Highest-value users: heavy multi-session automation (many sessions/day).
+> **Honest numbers** (measured on the author's own production setup, on disk, 2026-10-24)
+>
+> - Tiered recovery: **8,669 tokens** per session
+> - Naive baseline (read every file of all sixteen memory systems): **685,560 tokens**
+> - Ratio: **1.3%** (98.7% fewer tokens)
+> - Token counting: TODO — the repo does not yet record which tokenizer or estimation method produced these figures; do not cite them as tokenizer-exact until this is filled in.
+> - Host-injected identity (e.g. Hermes, 37,630 B) is counted separately and never double-read; whether it is included in both figures above is TODO — confirm before citing the ratio as all-in.
+> - The ~46 MB of raw material in the store is not on the restore path and is counted in neither figure.
+> - Reproduce: TODO — no one-command reproduction is recorded in the repo yet.
+>
+> This measures **token cost only**. See "Recovery quality check" below for whether the skipped content matters.
+>
+> Highest-value users: heavy multi-session automation (many sessions/day).
 
-## v0.99 — memory that never gets lost, three ways
+## Recovery quality check
+
+Questions the agent must answer correctly right after recovery. Same questions, two recovery modes. Not yet measured — fill in before citing any quality claim.
+
+| # | Question | Naive full restore | Tiered (ChangSheng) |
+|---|---|---|---|
+| 1 | Who is the user and what is their role? | TODO | TODO |
+| 2 | What are the three hard rules set for this project? | TODO | TODO |
+| 3 | What were the open todos at the end of last session? | TODO | TODO |
+| 4 | Why was decision X made? | TODO | TODO |
+| 5 | What file changed since the last session? | TODO | TODO |
+
+Pass rate: naive TODO/N, tiered TODO/N. Run date: TODO.
+
+## Memory that never gets lost, three ways
+
+Introduced in 0.99.0, still in 1.0.2:
 
 - **Memory ledger** (`scripts/memory_ledger.py`) — every long-lived memory carries four fields: why it exists, when it's reviewed, how long it lives, what happens at expiry. Hard budget cap (30 KB). Nothing rots silently; the check reports missing files, missing fields, overdue reviews, expired entries, and over-budget ledgers.
 - **Provenance recall** (`scripts/recall.py`) — "why did we decide this?" answered in seconds, with file names and line numbers, across todos, logs, notes/decisions, and archives. Every surface reports even on zero hits (silence is never confused with not searched); all-four-empty is its own exit code, never confused with "didn't look."
@@ -148,7 +178,7 @@ Outputs: `memory_index.md` (readable) + `memory_index_state.json` (state — don
 ## Repository layout
 
 ```
-changsheng/
+changsheng-agent-memory/     # install as ~/.claude/skills/changsheng/
 ├── SKILL.md                 # agent-facing instructions (progressive disclosure)
 ├── README.md                # this file
 ├── config.example.yaml      # configuration template
@@ -160,13 +190,17 @@ changsheng/
 ├── references/
 │   └── memory-system.md     # the method: four layers, whose/when tags, entry points, budget rules
 ├── assets/
+│   ├── agents-snippet.md    # paste-in block for AGENTS.md / .hermes.md
+│   ├── banner.png           # README banner
 │   └── handover-template.md # handover note template
+├── tests/
+│   └── test_scripts.py      # script self-tests (unittest)
 ├── CHANGELOG.md
 ├── LICENSE                  # MIT-0
 └── version
 ```
 
-### The two new doors (0.99.0)
+### The two new doors (introduced in 0.99.0)
 
 ```bash
 # ledger — the must-read layer as a budget with expiry
@@ -206,53 +240,18 @@ No. The handover note was already written for you. Just start a new session (or 
 **Does ChangSheng send my data anywhere?**
 No. Everything is local — discovery is name-only, the index hashes files you listed, nothing is uploaded. See Security.
 
-## Roadmap (managed edition)
+## Roadmap
 
 - Auto user-profiling (preferences / habits)
 - **0.99.0 — The design, published: `references/memory-system.md` (four layers, whose/when tags, entry points, budget rules) + `memory_ledger.py` (budget & expiry) + `recall.py` (reason-recall across four surfaces).**
-- **1.0 = the write side closes the loop.** 0.99 ships the read side (recovery) plus the method; 1.0 is when a memory also *enters* the system without you writing it down: capture (facts, decisions, preferences) happens as you work, the ledger's expiry actions actually run, and the archived layer is searchable across machines. Concrete bar for 1.0: (a) a write-side capture path with a documented entry point for every event type, (b) the ledger's `action_on_expiry` executed by a real runner rather than only reported, (c) cross-machine recall over the archive, (d) the recovery-cost measurement re-run on the 1.0 build and published as a number. Until those four hold, the version stays 0.99 — 0.99 is not a placeholder for 1.0, it's a complete read-side skill.
+- **1.1 = the write side closes the loop.** 1.0.x ships the read side (recovery) plus the method; 1.1 is when a memory also *enters* the system without you writing it down: capture (facts, decisions, preferences) happens as you work, the ledger's expiry actions actually run, and the archived layer is searchable across machines. Concrete bar for 1.1: (a) a write-side capture path with a documented entry point for every event type, (b) the ledger's `action_on_expiry` executed by a real runner rather than only reported, (c) cross-machine recall over the archive, (d) the recovery-cost measurement re-run on the 1.1 build and published as a number. Until those four hold, the write side stays half — periodic tidy-up, triggered by you.
 - **0.6.0 — Dreaming (write side) + Chinese reachability lines** (2026-09-19)
 - Cross-device sync + web console
 - One-click deploy
 
-**Don't want to self-configure?** The managed edition = zero-setup, full system, continuous updates. → [Managed edition: TBD]
-
 ## Going further
 
-ChangSheng is the memory layer. [AI Vault Pro](https://aivaultpro.com) is the full system: your agents hosted and orchestrated, memory included, backed up daily to your own cloud drive — leave anytime and take everything with you. Switch models whenever you like; the memory stays.
-
 Also by the same team: **Mode Switch Kit** — one command flips your whole machine stack (VPN, background agents, local services, model tier) from a single YAML mode matrix.
-
-
-
-
-## Paid services (optional)
-
-Everything in this repository is free (MIT-0) — use it, fork it, ship it. No purchase required, ever.
-
-We also take on a small number of **managed edition** engagements for teams that want the whole system, not just the skill:
-
-| | Free skeleton (this skill) | Managed edition |
-|---|---|---|
-| One line | Recover state before work starts, at ~1/3 the token cost | Memory that grows, cleans and indexes itself |
-| Pain it fixes | A new session is amnesia — you re-explain everything | The more it remembers, the messier it gets; nothing gets written down |
-| Read side (recovery) | ✅ four-layer + change index, 1.3% of a full restore | ✅ same, with thresholds tuned to your real volume |
-| Write side (how memory gets in) | ⚠️ half — periodic tidy-up, triggered by you | ✅ automatic: facts, decisions and preferences captured as they happen |
-| Handover | ✅ one command | ✅ handover + persistence + archive, nothing dropped |
-| Rules | ✅ action-time gate (non-zero exit blocks the action) | ✅ plus tiered approval: small changes run, big ones get reviewed and verified |
-| Knowledge base | ❌ not covered | ✅ four-layer sync, machine-checked |
-| Multi-agent / multi-person | ❌ not covered | ✅ ownership matrix + dispatch / receipt / acceptance loop |
-| What you get | a skill folder, works out of the box | a running system on your own machine (remote or on-premise) |
-
-- **Full memory system rollout** — we connect the memory you already have (notes, chat logs, private files) and stand up a system on **your own machine** that grows, cleans and indexes itself. Deliverable: a running setup + an operations guide + one month of support.
-- **Agent system build-out** — you provide a machine and one real use case; we build the whole stack (memory + role split + automation) until it runs. Deliverable: a running setup + an operations guide.
-- **Short-term rental pricing & operations** — connect your listing data; we produce actionable pricing rules and a daily operations checklist. Deliverable: a rules document + first-month support.
-
-We do not take: fully managed operations, revenue guarantees, or decisions made on your behalf. Pricing is quoted per engagement.
-
-**Model requirements (managed edition):** a frontier cloud model — Claude Sonnet-class / GPT-4o-class / DeepSeek V3-class or better. Context window **64K tokens or more** (hard requirement). Small local models (7B–14B) and retired models are not supported.
-
-**Get a quote** — open an issue in this repository titled `service inquiry` with your setup and timeline, or email **tianxuanjingchangsheng@gmail.com**.
 
 ## License
 

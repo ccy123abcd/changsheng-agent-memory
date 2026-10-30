@@ -31,5 +31,5 @@ Then handle the user's request. Do not skip step 6: it is how the user can tell 
 
 ## If your platform has no workspace instruction file
 
-Just say **"recover memory"** (or "接着上次") at the start of a session — the skill runs the same
+Just say **"recover memory"** (or "resume last session") at the start of a session — the skill runs the same
 procedure on demand.

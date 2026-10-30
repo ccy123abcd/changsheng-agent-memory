@@ -1,8 +1,23 @@
 # Changelog
 
-版本方案:**SemVer 2.0.0**(semver.org)——MAJOR=不兼容大改 / MINOR=向后兼容新功能 / PATCH=向后兼容修 bug;格式遵循 **Keep a Changelog**(keepachangelog.com):每版一节最新在上,日期 ISO 8601,改动按六类 Added/Changed/Deprecated/Removed/Fixed/Security。Unreleased 随做随记,发布时改版本号+日期,顶部重置空 Unreleased。
+Versioning: SemVer 2.0.0 (semver.org) — MAJOR=breaking change / MINOR=backward-compatible feature / PATCH=backward-compatible bugfix; format follows Keep a Changelog (keepachangelog.com): one section per version, newest on top, dates ISO 8601, changes grouped into six types Added/Changed/Deprecated/Removed/Fixed/Security. Unreleased is updated as you go; on release, set version number + date and reset to an empty Unreleased at top.
 
 ## [Unreleased]
+
+### Added
+- **Tests.** `tests/test_scripts.py` (script demos, recall exit 3 on nothing searchable, ledger no-ledger / bad-ledger behaviour).
+- **Recovery quality check section** in README (questions to answer after recovery, two modes) — marked TODO until measured; no quality numbers are claimed yet.
+
+### Changed
+- **README version badge is now tag-driven** (`github/v/tag`), so it follows the release tag instead of a hardcoded 1.0.1. Note: no v1.0.2 tag exists yet — the badge will show v0.99.0 until a v1.0.2 tag is pushed.
+- **README platform table now includes WorkBuddy**, matching SKILL.md.
+- **README Quick start** clones straight into `~/.claude/skills/changsheng` (no rename step, no broken `cp -r changsheng` path); Windows PowerShell note added; repository layout now lists `agents-snippet.md` and `banner.png`.
+- **README numbers clarified**: "naive" added before full-restore baselines; Honest numbers rewritten as a structured list with explicit TODOs for tokenizer / host-injected inclusion / reproduction command, which are not recorded in the repo and were not invented.
+- **Roadmap corrected**: the 1.0 write-side bar moves to 1.1; the "version stays 0.99" sentence is removed; the v0.99 section is renamed to a version-neutral title with an "introduced in 0.99.0" note.
+- **L3 fallback wording corrected**: "keyword / full-text search" (no semantic search — `references/memory-system.md` explicitly says no semantic search).
+
+### Removed
+- **Paid services section, in full** — managed-edition engagements, pricing, model requirements and the service-inquiry email, plus the managed-edition line in Roadmap and the paid-side sentence in "Why is this free?". The "Going further" AI Vault Pro paragraph was also removed as a paid upsell; restore it as a single neutral cross-link only if you want that traffic link back.
 
 ## [1.0.2] - 2026-10-28
 
